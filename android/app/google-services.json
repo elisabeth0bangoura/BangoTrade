@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "30404831653",
+    "firebase_url": "https://bangotrade-94704-default-rtdb.firebaseio.com",
+    "project_id": "bangotrade-94704",
+    "storage_bucket": "bangotrade-94704.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:30404831653:android:43274f7b2cb27b489ea04c",
+        "android_client_info": {
+          "package_name": "com.bangoTrade"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "30404831653-0mphrqpofemugrtntf7gq9o6hbtdi1rv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bangoTrade",
+            "certificate_hash": "997d169ce4458b6de27d41dc0f3761bf5f3e924e"
+          }
+        },
+        {
+          "client_id": "30404831653-va590uqculmjagg1t0lf4blqkk8o6gao.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyCewf3TLqdOoCxOQAqifd2gmm-apRxZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "30404831653-va590uqculmjagg1t0lf4blqkk8o6gao.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "30404831653-27jpvs2c64pd72ji2ikg1unso43rq1fl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bangoTrade"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
