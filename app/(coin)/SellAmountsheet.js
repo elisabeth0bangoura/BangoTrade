@@ -36,7 +36,6 @@ import PagerView from 'react-native-pager-view';
 import { SellAmountContext } from '../Context/SellOpenAmountSheetContext';
 import { AddMoneyToAccountContext } from '../Context/AddMoneyToAccountContext';
 import AddMoneyToAccount from './AddMoneyToAccount';
-import firestore from '@react-native-firebase/firestore';
 
 
 import { BuyConfirmationSheetContext } from '../Context/BuyConfirmationSheetContext';
@@ -47,6 +46,12 @@ import { ToastMessageContext } from '../Context/ToastMessageContext';
 import { ViewModeContext } from '../Context/ViewModeContext';
 
 
+import firestore from '@react-native-firebase/firestore';
+
+import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot } from "@react-native-firebase/firestore";
+import { useRouter } from "expo-router";
+import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
+import { getDatabase, ref, get } from "@react-native-firebase/database";
 
 
 
@@ -114,18 +119,101 @@ export const SellAmountTypeSheetPage = () => {
     setCoinPageIndex,  
     CurrentBackgroundColorForCoin, 
     setCurrentBackgroundColorForCoin, coinData, setCoinData, coinSymbol, setCoinSymbol  } = useContext(CoinPageContext);
+    const [AvailbeAssetSellAmount, setAvailbeAssetSellAmount] = useState(0)
+
+
+
+    const [AlpacaUserId, setAlpacaUserId] = useState(null);
 
 
 
 
 
-  useEffect(() => {
 
 
-    console.log("CurrentBuyType: ", CurrentBuyType)
 
-  }, [])
 
+
+
+
+
+
+
+    useEffect(() => {
+      const unsubscribe = auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          try {
+            const userDocument = await firestore()
+              .collection('users')
+              .doc(user.uid)
+              .get();
+    
+            if (userDocument.exists) {
+              setAlpacaUserId(userDocument.data().AlpacaAccountId);
+
+
+          const GetAssetAmountIWantToSell = async () => {
+
+          
+            console.log("coinData ", coinData.symbol+"USD")
+            
+            const coinSymbol = coinData.symbol+"USD";
+            
+            await fetch(`https://broker-api.sandbox.alpaca.markets/v1/trading/accounts/${userDocument.data().AlpacaAccountId}/positions`, {
+              method: 'GET',
+              headers: {
+                accept: 'application/json',
+                authorization: 'Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA=='
+              }
+            })
+              .then(res => res.json())
+              .then(data => {
+                const match = data.find(item => item.symbol === coinSymbol);
+                
+                if (match) {
+                  console.log('Found matching position:', match);
+            
+                  setAvailbeAssetSellAmount(match.market_value)
+            
+                } else {
+                  console.log('No matching symbol found');
+                }
+              })
+              .catch(err => console.error('Error fetching positions:', err));
+            
+            }
+            GetAssetAmountIWantToSell()
+            
+            }
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+          }
+        }
+      });
+    
+      return () => unsubscribe(); // Cleanup on unmount
+    }, [AvailbeAssetSellAmount]); // ← Run once on mount
+    
+
+    
+
+
+
+
+    
+
+
+
+
+const formatCurrency = (value) => {
+  if (!value) return '0';
+  
+  return new Intl.NumberFormat('us-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2, // Ensure two decimal places
+  }).format(value);
+};
 
 
 
@@ -210,7 +298,7 @@ export const SellAmountTypeSheetPage = () => {
              marginTop: height(2),
             // marginBottom: height(1)
            }}>
-             {t("YouHaveAmountButtonTitleInSellAmountTypeSheetPage1")} 9.65 $ {t("YouHaveAmountButtonTitleInSellAmountTypeSheetPage2")}
+             {t("YouHaveAmountButtonTitleInSellAmountTypeSheetPage1")} {formatCurrency(AvailbeAssetSellAmount)} {t("YouHaveAmountButtonTitleInSellAmountTypeSheetPage2")}
            </Text>
  
 
@@ -542,6 +630,82 @@ const SellAmountsheet =  React.memo(({ AssetSupply}) => {
 
 
 
+    const [AlpacaUserId, setAlpacaUserId] = useState(null);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    useEffect(() => {
+      const unsubscribe = auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          try {
+            const userDocument = await firestore()
+              .collection('users')
+              .doc(user.uid)
+              .get();
+    
+            if (userDocument.exists) {
+              setAlpacaUserId(userDocument.data().AlpacaAccountId);
+
+
+
+            const GetAssetAmountIWantToSell = async () => {
+
+            
+              console.log("coinData ", coinData.symbol+"USD")
+              
+              const coinSymbol = coinData.symbol+"USD";
+              
+              await fetch(`https://broker-api.sandbox.alpaca.markets/v1/trading/accounts/${userDocument.data().AlpacaAccountId}/positions`, {
+                method: 'GET',
+                headers: {
+                  accept: 'application/json',
+                  authorization: 'Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA=='
+                }
+              })
+                .then(res => res.json())
+                .then(data => {
+                  const match = data.find(item => item.symbol === coinSymbol);
+                  
+                  if (match) {
+                    console.log('Found matching position:', match);
+              
+                    setAvailbeAssetSellAmount(match.market_value)
+              
+                  } else {
+                    console.log('No matching symbol found');
+                  }
+                })
+                .catch(err => console.error('Error fetching positions:', err));
+              
+              }
+              GetAssetAmountIWantToSell()
+              
+    
+            }
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+          }
+        }
+      });
+    
+      return () => unsubscribe(); // Cleanup on unmount
+    }, [AvailbeAssetSellAmount]); // ← Run once on mount
+    
+
+
+    
 
 
 
@@ -563,51 +727,6 @@ const SellAmountsheet =  React.memo(({ AssetSupply}) => {
 
 
 // Check If bankAccout Is linked
-
-
-
-
-
-
-
-useEffect(() => {
-
-
-  const GetAssetAmountIWantToSell = async () => {
-
-  
-console.log("coinData ", coinData.symbol+"USD")
-
-const coinSymbol = coinData.symbol+"USD";
-
-await fetch('https://broker-api.sandbox.alpaca.markets/v1/trading/accounts/d74eae4b-a5a1-48cd-bbe5-9e90bf71d5fa/positions', {
-  method: 'GET',
-  headers: {
-    accept: 'application/json',
-    authorization: 'Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA=='
-  }
-})
-  .then(res => res.json())
-  .then(data => {
-    const match = data.find(item => item.symbol === coinSymbol);
-    
-    if (match) {
-      console.log('Found matching position:', match);
-
-      setAvailbeAssetSellAmount(match.market_value)
-
-    } else {
-      console.log('No matching symbol found');
-    }
-  })
-  .catch(err => console.error('Error fetching positions:', err));
-
-}
-GetAssetAmountIWantToSell()
-
-
-}, [AvailbeAssetSellAmount])
-
 
 
 

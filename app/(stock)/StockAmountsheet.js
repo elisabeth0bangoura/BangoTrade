@@ -50,6 +50,12 @@ import { ToastMessageContext } from '../Context/ToastMessageContext';
 
 
 
+import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot } from "@react-native-firebase/firestore";
+import { useRouter } from "expo-router";
+import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
+import { getDatabase, ref, get } from "@react-native-firebase/database";
+
+
 
 
 
@@ -473,6 +479,7 @@ const StockAmountsheet =  React.memo(({ AssetSupply}) => {
     const [BuyPower, setBuyPower] = useState(false)
     const [AvailbeAssetSellAmount, setAvailbeAssetSellAmount] = useState(0)
 
+    const [AlpacaUserId, setAlpacaUserId] = useState(null);
 
 
 
@@ -496,57 +503,75 @@ const StockAmountsheet =  React.memo(({ AssetSupply}) => {
 
 
 
-// Check If bankAccout Is linked
 
-
-
-
-
-
-
-
-
-
-
-
-useEffect(() => {
-
-
-  const GetAssetAmountIWantToSell = async () => {
-
-  
-console.log("coinData ", coinData.symbol+"USD")
-
-const coinSymbol = coinData.symbol+"USD";
-
-await fetch('https://broker-api.sandbox.alpaca.markets/v1/trading/accounts/d74eae4b-a5a1-48cd-bbe5-9e90bf71d5fa/positions', {
-  method: 'GET',
-  headers: {
-    accept: 'application/json',
-    authorization: 'Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA=='
-  }
-})
-  .then(res => res.json())
-  .then(data => {
-    const match = data.find(item => item.symbol === coinSymbol);
+    useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          const user = getAuth().currentUser;
+          if (user) {
+            const userDocument = await firestore()
+              .collection('users')
+              .doc(user.uid) // Reference to the 'users' collection
+              .get();
     
-    if (match) {
-      console.log('Found matching position:', match);
-
-      setAvailbeAssetSellAmount(match.market_value)
-
-    } else {
-      console.log('No matching symbol found');
-    }
-  })
-  .catch(err => console.error('Error fetching positions:', err));
-
-}
-GetAssetAmountIWantToSell()
+            if (userDocument.exists) {
+              setAlpacaUserId(userDocument.data().AlpacaAccountId);
+            //  console.log("AlpacaAccountId: ", userDocument.data().AlpacaAccountId);
+    
+            const GetAssetAmountIWantToSell = async () => {
 
 
-}, [AvailbeAssetSellAmount])
+              
+              const options = {
+                method: 'GET',
+                headers: {
+                  accept: 'application/json',
+                  authorization: 'Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA=='
+                }
+              };
+              
+            await fetch(`https://broker-api.sandbox.alpaca.markets/v1/trading/accounts/${userDocument.data().AlpacaAccountId}/account`, options)
+                .then(res => res.json())
+                .then(data => {
 
+
+          
+
+              console.log("Amount to avaialble ", data.buying_power)
+
+                setAvailbeAssetSellAmount(data.buying_power)
+
+
+            })
+            .catch(err => console.error('Error fetching positions:', err));
+
+          }
+          GetAssetAmountIWantToSell()
+
+            } else {
+           //   console.log('No such document!');
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      };
+    
+      
+      fetchUserData();
+    }, [AvailbeAssetSellAmount]);  // Empty array ensures effect runs only once on component mount
+    
+    
+    
+
+
+
+
+
+
+
+
+    
 
 
 

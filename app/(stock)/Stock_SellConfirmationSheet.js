@@ -1266,7 +1266,7 @@ style={{
                bottom: height(6),
                flexDirection: 'row'
         }}>
-        <TouchableOpacity onPress={() => CloseAddMoneyToAccountSheet()}
+        <TouchableOpacity onPress={() =>  SheetManager.hide("Stock_SellConfirmation_Sheet")}
         style={{
             height: size(55),
             width: size(55),
