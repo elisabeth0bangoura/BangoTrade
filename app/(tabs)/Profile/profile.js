@@ -42,6 +42,7 @@ import * as Sharing from 'expo-sharing';
 import { ViewModeContext } from '../../Context/ViewModeContext';
 
 import firestore from '@react-native-firebase/firestore';
+import { usePostHog } from 'posthog-react-native';
 
 import { getFirestore, doc, getDoc } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
@@ -57,6 +58,7 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 
 const Profile = ({openSheet}) => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -104,6 +106,21 @@ const Profile = ({openSheet}) => {
         authorization: 'Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA=='
       }
     };
+
+
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Profile',
+      $screen_name: 'Profile',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
+
+
 
 
     useEffect(() => {
@@ -385,6 +402,14 @@ const formatPrice = (price) => {
 
 
       <TouchableOpacity onPress={() => {
+
+        posthog.capture('open_account_details_bottomsheet', {
+          screen: 'Profile',
+          $screen_name: 'Profile',
+          timestamp: new Date().toISOString(),
+
+          });
+
         SheetManager.show("AccountDetails_Sheet")
       }}
       style={{
@@ -481,6 +506,12 @@ const formatPrice = (price) => {
       </View>
 
       <TouchableOpacity onPress={() => {
+           posthog.capture('open_settings_bottomsheet', {
+            screen: 'Profile',
+            $screen_name: 'Profile',
+            timestamp: new Date().toISOString(),
+  
+            });
         SheetManager.show("Settings_Sheet")
       }}
       style={{
@@ -539,6 +570,13 @@ const formatPrice = (price) => {
 
 
   <TouchableOpacity onPress={() => {
+
+  posthog.capture('open_help_bottomsheet', {
+    screen: 'Profile',
+    $screen_name: 'Profile',
+    timestamp: new Date().toISOString(),
+
+    });
     
     SheetManager.show("Help_Sheet")
    }}
@@ -643,6 +681,14 @@ const formatPrice = (price) => {
       }}>
 
         <TouchableOpacity  onPress={() => {
+
+        posthog.capture('open_activity_bottomsheet', {
+          screen: 'Profile',
+          $screen_name: 'Profile',
+          timestamp: new Date().toISOString(),
+
+          });
+
           SheetManager.show("Activity_Sheet")
         }}
         style={{
@@ -682,6 +728,16 @@ const formatPrice = (price) => {
 
 
         <TouchableOpacity onPress={() => {
+
+
+        posthog.capture('open_total_asset_bottomsheet', {
+          screen: 'Profile',
+          $screen_name: 'Profile',
+          timestamp: new Date().toISOString(),
+
+          });
+
+
           SheetManager.show("TotalAsset_Sheet")
         }}
         style={{
@@ -720,6 +776,14 @@ const formatPrice = (price) => {
 
 
         <TouchableOpacity onPress={() => {
+
+        posthog.capture('open_portfolio_statements_bottomsheet', {
+          screen: 'Profile',
+          $screen_name: 'Profile',
+          timestamp: new Date().toISOString(),
+
+          });
+
           SheetManager.show("PortfolioStatements_Sheet")
         }}
         style={{
@@ -766,32 +830,41 @@ const formatPrice = (price) => {
 
         <TouchableOpacity onPress={() => {
 
-const handleSignOut = async () => {
-  try {
-    console.log("🚪 Logging out user...");
 
-    // Firebase sign out
-    await signOut(auth).catch((err) => {
-      if (err.code !== "auth/no-current-user") {
-        throw err;
-      }
-      console.log("ℹ️ Already signed out.");
-    });
+    posthog.capture('sign_out', {
+      screen: 'Profile',
+      $screen_name: 'Profile',
+      timestamp: new Date().toISOString(),
 
-    // Clear local storage
-    await AsyncStorage.multiRemove(["userUID", "faceIdEnabled", "lastAuthTime"]);
+      });
 
-    // Reset splash
-    setShowSplash(false);
 
-    // Navigate to Auth
-    router.replace("/(auth)/signUp");
-  } catch (e) {
-    console.error("❌ Fehler beim Abmelden:", e);
-    Alert.alert("Fehler", "Abmeldung fehlgeschlagen.");
-  }
-};
-handleSignOut()
+        const handleSignOut = async () => {
+          try {
+            console.log("🚪 Logging out user...");
+
+            // Firebase sign out
+            await signOut(auth).catch((err) => {
+              if (err.code !== "auth/no-current-user") {
+                throw err;
+              }
+              console.log("ℹ️ Already signed out.");
+            });
+
+            // Clear local storage
+            await AsyncStorage.multiRemove(["userUID", "faceIdEnabled", "lastAuthTime"]);
+
+            // Reset splash
+            setShowSplash(false);
+
+            // Navigate to Auth
+            router.replace("/(auth)/signUp");
+          } catch (e) {
+            console.error("❌ Fehler beim Abmelden:", e);
+            Alert.alert("Fehler", "Abmeldung fehlgeschlagen.");
+          }
+        };
+        handleSignOut()
         }}
         style={{
         
@@ -832,6 +905,179 @@ handleSignOut()
       width: size(25),
       alignSelf: 'center',
     }}>
+
+
+
+{
+        CurrentViewMode.Mode_Name == "The White Theme"
+
+        ?
+
+        <Image source={require("../../../assets/Logo_Icon_grey.png")}
+        style={{
+          height: "100%",
+          width: "100%",
+          resizeMode: 'contain'
+        }} />
+
+        :
+
+        null
+      }
+
+
+
+
+{
+        CurrentViewMode.Mode_Name == "Black Theme"
+
+        ?
+
+        <Image source={require("../../../assets/Logo_Icon_black.png")}
+        style={{
+          height: "100%",
+          width: "100%",
+          resizeMode: 'contain'
+        }} />
+
+        :
+
+        null
+      }
+
+
+
+
+
+
+
+
+
+{
+        CurrentViewMode.Mode_Name == "The Baddie Theme"
+
+        ?
+
+        <Image source={require("../../../assets/Logo_Icon_pink.png")}
+        style={{
+          height: "100%",
+          width: "100%",
+          resizeMode: 'contain'
+        }} />
+
+        :
+
+        null
+      }
+
+
+
+
+
+
+
+{
+        CurrentViewMode.Mode_Name == "Gray Theme"
+
+        ?
+
+        <Image source={require("../../../assets/Logo_Icon_grayTheme.png")}
+        style={{
+          height: "100%",
+          width: "100%",
+          resizeMode: 'contain'
+        }} />
+
+        :
+
+        null
+      }
+     
+     
+     
+
+
+
+
+
+{
+        CurrentViewMode.Mode_Name == "Purple Rain Theme"
+
+        ?
+
+        <Image source={require("../../../assets/Logo_Icon_purple.png")}
+        style={{
+          height: "100%",
+          width: "100%",
+          resizeMode: 'contain'
+        }} />
+
+        :
+
+        null
+      }
+     
+
+
+
+
+
+
+
+
+
+
+
+
+     {
+        CurrentViewMode.Mode_Name == "The Green Theme"
+
+        ?
+
+        <Image source={require("../../../assets/Logo_Icon_green.png")}
+        style={{
+          height: "100%",
+          width: "100%",
+          resizeMode: 'contain'
+        }} />
+
+        :
+
+        null
+      }
+     
+
+
+
+
+
+
+
+
+
+
+     {
+        CurrentViewMode.Mode_Name == "The blue based Color Theme"
+
+        ?
+
+        <Image source={require("../../../assets/Logo_Icon_bluebased.png")}
+        style={{
+          height: "100%",
+          width: "100%",
+          resizeMode: 'contain'
+        }} />
+
+        :
+
+        null
+      }
+
+
+
+
+
+
 
       {
         CurrentViewMode.Mode_Name == "Honey Theme"

@@ -38,6 +38,7 @@ import { AmountContext } from '../../Context/OpenAmountSheetContext';
 import { CoinPageContext } from '../../Context/OpenCoinPageContext';
 import { SellAmountContext } from '../../Context/SellOpenAmountSheetContext';
 import RNPickerSelect from "react-native-picker-select";
+import { usePostHog } from 'posthog-react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { HomeContext } from '../../Context/HomeContext';
@@ -56,7 +57,8 @@ import { ViewModeContext } from '../../Context/ViewModeContext';
 
 
 export default function SettingsSheet () {
-  
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { t } = useTranslation();
 
@@ -72,6 +74,22 @@ export default function SettingsSheet () {
     const [UserLastname, setUserLastname] = useState("")
     
     
+
+
+
+
+
+
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'Settings_Sheet',
+        $screen_name: 'Settings_Sheet',
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+    
+  
+
 
 
 
@@ -196,6 +214,13 @@ export default function SettingsSheet () {
 
 
             <TouchableOpacity onPress={() => {
+
+              posthog.capture('open_personal_data_bottomsheet', {
+                screen: 'Settings_Sheet',
+                $screen_name: 'Settings_Sheet',
+                timestamp: new Date().toISOString(),
+
+                });
               SheetManager.show("PersonalData_Sheet")
             }}
             style={{
@@ -248,6 +273,14 @@ export default function SettingsSheet () {
 
 
             <TouchableOpacity onPress={() => {
+
+            posthog.capture('open_settings_security_data_protection_bottomsheet', {
+              screen: 'Settings_Sheet',
+              $screen_name: 'Settings_Sheet',
+              timestamp: new Date().toISOString(),
+
+              });
+
               SheetManager.show("SettingsSecurityDataProtection_Sheet")
             }}
             style={{
@@ -313,6 +346,14 @@ export default function SettingsSheet () {
 
 
             <TouchableOpacity onPress={() => {
+
+              posthog.capture('open_settings_viewmode_bottomsheet', {
+                screen: 'Settings_Sheet',
+                $screen_name: 'Settings_Sheet',
+                timestamp: new Date().toISOString(),
+
+                });
+                
               SheetManager.show("ViewMode_Sheet")
             }}
             style={{
@@ -373,6 +414,14 @@ export default function SettingsSheet () {
 
 
             <TouchableOpacity onPress={() => {
+
+              posthog.capture('open_settings_notification_bottomsheet', {
+                screen: 'Settings_Sheet',
+                $screen_name: 'Settings_Sheet',
+                timestamp: new Date().toISOString(),
+
+                });
+  
               SheetManager.show("SettingsNotification_Sheet")
             }}
             style={{
@@ -435,6 +484,14 @@ export default function SettingsSheet () {
 
 
             <TouchableOpacity onPress={() => {
+
+              posthog.capture('open_settings_change_language_bottomsheet', {
+                screen: 'Settings_Sheet',
+                $screen_name: 'Settings_Sheet',
+                timestamp: new Date().toISOString(),
+
+                });
+
               SheetManager.show("ChangeLanguage_Sheet")
             }}
             style={{
@@ -497,6 +554,14 @@ export default function SettingsSheet () {
 
 
             <TouchableOpacity onPress={() => {
+
+              posthog.capture('open_settings_other_services_bottomsheet', {
+                screen: 'Settings_Sheet',
+                $screen_name: 'Settings_Sheet',
+                timestamp: new Date().toISOString(),
+
+                });
+
               SheetManager.show("OtherServices_Sheet")
             }}
             style={{
@@ -546,13 +611,22 @@ export default function SettingsSheet () {
 
 
 
-            <View style={{
-width: "100%",
-position: 'absolute',
-  bottom: height(5),
-   flexDirection: 'row',
-}}>
+      <View style={{
+        width: "100%",
+        position: 'absolute',
+        bottom: height(8),
+        flexDirection: 'row',
+      }}>
+
+
         <TouchableOpacity onPress={() => {
+
+          posthog.capture('close_settings_bottomsheet', {
+            screen: 'Settings_Sheet',
+            $screen_name: 'Settings_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
           
            setTimeout(() => {
              SheetManager.hide("Settings_Sheet"); // Now hide the sheet after a delay

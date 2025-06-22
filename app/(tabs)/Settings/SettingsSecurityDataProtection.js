@@ -53,6 +53,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { HomeContext } from '../../Context/HomeContext';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { usePostHog } from 'posthog-react-native';
 
 import { TextInput } from 'react-native-gesture-handler';
 
@@ -84,6 +85,9 @@ const documentId = 'b7e0f8af-9e06-4751-b502-a7ac44655e86';  // Example document 
 
 export default SettingsSecurityDataProtection = () => {
 
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
   const { t } = useTranslation();
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -95,7 +99,17 @@ export default SettingsSecurityDataProtection = () => {
 
 
  const [isEnabledShareUsageData, setIsEnabledShareUsageData] = useState(false);
- const toggleSwitchShareUsageData = () => setIsEnabledShareUsageData(previousState => !previousState);
+ const toggleSwitchShareUsageData = () => {
+
+  posthog.capture('clicked_settings_switch_share_usage_data_bottomsheet', {
+    screen: 'SettingsSecurityDataProtection_Sheet',
+    $screen_name: 'SettingsSecurityDataProtection_Sheet',
+    timestamp: new Date().toISOString(),
+  
+    });
+
+  setIsEnabledShareUsageData(previousState => !previousState)
+};
 
 
   
@@ -127,6 +141,24 @@ export default SettingsSecurityDataProtection = () => {
 
    const userId =  currentUser.uid
       
+
+
+
+
+
+
+
+
+
+
+   useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'SettingsSecurityDataProtection_Sheet',
+      $screen_name: 'SettingsSecurityDataProtection_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
 
 
 
@@ -263,6 +295,14 @@ export default SettingsSecurityDataProtection = () => {
 
 
   const toggleSwitchFaceId = async (newValue) => {
+
+    posthog.capture('clicked_settings_switch_faceid_bottomsheet', {
+      screen: 'SettingsSecurityDataProtection_Sheet',
+      $screen_name: 'SettingsSecurityDataProtection_Sheet',
+      timestamp: new Date().toISOString(),
+    
+      });
+
     if (newValue) {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
@@ -479,7 +519,12 @@ style={{
 
 <TouchableOpacity onPress={() => {
 
+posthog.capture('open_settings_change_pin_bottomsheet', {
+  screen: 'SettingsSecurityDataProtection_Sheet',
+  $screen_name: 'SettingsSecurityDataProtection_Sheet',
+  timestamp: new Date().toISOString(),
 
+  });
 
   SheetManager.show("ChnagePinSettings_Sheet")
 }}

@@ -45,6 +45,7 @@ import { ViewModeContext } from '@/app/Context/ViewModeContext';
 import { getFirestore, doc, getDoc } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
 import { getAuth, signOut, signInWithEmailAndPassword, onAuthStateChanged } from "@react-native-firebase/auth";
+import { usePostHog } from 'posthog-react-native';
 
 const HEADER_HEIGHT = 300; // The height of the header
 
@@ -71,6 +72,9 @@ const HEADER_HEIGHT = 300; // The height of the header
 
 
 const Widthraw =  React.memo(({ AssetSupply}) => {
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const router = useRouter();
   const auth = getAuth();
@@ -167,14 +171,30 @@ const Widthraw =  React.memo(({ AssetSupply}) => {
       const [ACHBankRelationshipStatus, setACHBankRelationshipStatus] = useState(false)
       
 
+
+
+
+
+
+         
+      useEffect(() => {
+        posthog.capture('screen_viewed', {
+          screen: 'Widthraw',
+          $screen_name: 'Widthraw',
+          timestamp: new Date().toISOString(),
+        });
+      }, []);
+      
+
+
+
+
+
+
+
     
     useEffect(() => {
     
-
-
-
-
-
   // Fetch data from the Firestore path
   const fetchUserData = async () => {
     try {
@@ -795,6 +815,13 @@ const Widthraw =  React.memo(({ AssetSupply}) => {
   
        
           <TouchableOpacity onPress={() => {
+              posthog.capture('did_not_finish_widthraw_transfer', {
+                screen: 'Widthraw',
+                $screen_name: 'Widthraw',
+                timestamp: new Date().toISOString(),
+                });
+
+                
           SheetManager.hide("Widthraw_Sheet")
           }}
           style={{
@@ -857,6 +884,14 @@ const Widthraw =  React.memo(({ AssetSupply}) => {
 
 
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+
+
+                posthog.capture('successfully_finish_widthraw_transfer', {
+                  screen: 'Widthraw',
+                  $screen_name: 'Widthraw',
+                  timestamp: new Date().toISOString(),
+                  });
+
                     console.log("here ", res)
                     setShowToastSell(true); // ✅ Make sure this updates before sheets close
                     SheetManager.hide("Widthraw_Sheet")

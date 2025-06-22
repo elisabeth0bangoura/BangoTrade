@@ -48,6 +48,7 @@ import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot  } from "@rea
 import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -60,6 +61,10 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 
 export default function FurtherStatementsSheet () {
 
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+  
   const { t } = useTranslation();
 
   const router = useRouter();
@@ -128,6 +133,13 @@ export default function FurtherStatementsSheet () {
 
 
 
+      useEffect(() => {
+        posthog.capture('screen_viewed', {
+          screen: 'FurtherStatementsSheet',
+          $screen_name: 'FurtherStatementsSheet',
+          timestamp: new Date().toISOString(),
+        });
+      }, []);
 
 
 

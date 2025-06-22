@@ -52,6 +52,7 @@ import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot } from "@reac
 import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -81,6 +82,10 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 
 
 export const StockSellAmountTypeSheet = () => {
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const currentUser = auth().currentUser;
 
@@ -128,7 +133,14 @@ export const StockSellAmountTypeSheet = () => {
 
 
 
-
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'Stock_SellAmountType_Sheet',
+        $screen_name: 'Stock_SellAmountType_Sheet '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+    
 
 
 
@@ -231,11 +243,15 @@ export const StockSellAmountTypeSheet = () => {
 
     <ActionSheet ref={Stock_SellAmountType_Sheet}
     //backgroundInteractionEnabled={false}
+    onClose={
+      posthog.capture('closed_sheet', {
+        screen: 'Stock_SellAmountType_Sheet',
+        $screen_name: 'Stock_SellAmountType_Sheet '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+        })
+    }
     isModal={false}
-    gestureEnabled={true}
-
-
- 
+    gestureEnabled={true} 
      CustomHeaderComponent={
    <> 
    
@@ -321,6 +337,14 @@ export const StockSellAmountTypeSheet = () => {
            }}>
 
            <TouchableOpacity onPress={() => {
+
+          posthog.capture('clicked_shares_sellamount_25%_button', {
+            screen: 'Stock_SellAmountType_Sheet',
+            $screen_name: 'Stock_SellAmountType_Sheet '+" / "+coinData.name,
+            timestamp: new Date().toISOString(),
+            });
+
+
             setSharesSellAmount("25")
            }}
            style={{
@@ -345,6 +369,12 @@ export const StockSellAmountTypeSheet = () => {
 
 
            <TouchableOpacity onPress={() => {
+
+          posthog.capture('clicked_shares_sellamount_50%_button', {
+            screen: 'Stock_SellAmountType_Sheet',
+            $screen_name: 'Stock_SellAmountType_Sheet '+" / "+coinData.name,
+            timestamp: new Date().toISOString(),
+            });
             setSharesSellAmount("50")
            }}
            style={{
@@ -383,6 +413,12 @@ export const StockSellAmountTypeSheet = () => {
            }}>
 
            <TouchableOpacity onPress={() => {
+
+          posthog.capture('clicked_shares_sellamount_100%_button', {
+            screen: 'Stock_SellAmountType_Sheet',
+            $screen_name: 'Stock_SellAmountType_Sheet '+" / "+coinData.name,
+            timestamp: new Date().toISOString(),
+            });
             setSharesSellAmount("100")
            }}
            style={{
@@ -409,6 +445,13 @@ export const StockSellAmountTypeSheet = () => {
 
            <TouchableOpacity onPress={() => {
           
+
+          posthog.capture('open_stock_sellamount_ordertype_bottomsheet', {
+            screen: 'Stock_SellAmountType_Sheet',
+            $screen_name: 'Stock_SellAmountType_Sheet '+" / "+coinData.name,
+            timestamp: new Date().toISOString(),
+            });
+
             
             SheetManager.show("Stock_Sell_OrderType_Sheet");
            }}
@@ -438,6 +481,14 @@ export const StockSellAmountTypeSheet = () => {
 
      
         <TouchableOpacity onPress={() => {
+
+        posthog.capture('open_stock_sellamount_ordertype_bottomsheet', {
+          screen: 'Stock_SellAmountType_Sheet',
+          $screen_name: 'Stock_SellAmountType_Sheet '+" / "+coinData.name,
+          timestamp: new Date().toISOString(),
+          });
+
+
           SheetManager.show("Stock_Sell_OrderType_Sheet");
         }}
 
@@ -484,6 +535,14 @@ export const StockSellAmountTypeSheet = () => {
 
     
             <TouchableOpacity onPress={() => {
+
+                posthog.capture('open_stock_sell_confirmation_bottomsheet', {
+                  screen: 'Stock_SellAmountType_Sheet',
+                  $screen_name: 'Stock_SellAmountType_Sheet '+" / "+coinData.name,
+                  timestamp: new Date().toISOString(),
+                  });
+
+
                 // Show the Sell Confirmation Shares Sheet
                 SheetManager.show('Stock_SellConfirmationShares_Sheet');
 
@@ -570,6 +629,11 @@ export const StockSellAmountTypeSheet = () => {
 
 
 const StockSellAmountsSheet =  React.memo(({ AssetSupply}) => {
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
   const Stock_SellAmounts_Sheet = useRef(null);
 
 
@@ -645,6 +709,19 @@ const StockSellAmountsSheet =  React.memo(({ AssetSupply}) => {
 
 
 
+
+
+
+
+
+
+useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'Stock_SellAmounts_Sheet',
+    $screen_name: 'Stock_SellAmounts_Sheet '+" / "+coinData.name,
+    timestamp: new Date().toISOString(),
+  });
+}, []);
 
 
 
@@ -1117,12 +1194,17 @@ return(
 
  <ActionSheet id="Stock_SellAmounts_Sheet"
   ref={Stock_SellAmounts_Sheet}
-
-
   backgroundInteractionEnabled={false}
   gestureEnabled={true}
 
   onClose={() => {
+
+      posthog.capture('closed_sheet', {
+        screen: 'Stock_SellAmounts_Sheet',
+        $screen_name: 'Stock_SellAmounts_Sheet '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+        });
+
     setValue("0")
     setRawValue("0")
     setValueShares("0")
@@ -1348,13 +1430,51 @@ return(
 
 
 
-        <View style={{
-          marginTop: height(18)
+   
+            <View style={{
+               position: 'absolute',
+               bottom: height(-9),
+               flexDirection: 'row'
         }}>
 
+
      
      
 
+        <TouchableOpacity onPress={() => {
+
+        posthog.capture('canceled_sell_stockmoneyamount_Sheet', {
+          screen: 'Stock_SellAmounts_Sheet',
+          $screen_name: 'Stock_SellAmounts_Sheet '+" / "+coinData.name,
+          timestamp: new Date().toISOString(),
+          });
+   
+          
+          Promise.all([
+          SheetManager.hide("Stock_SellAmounts_Sheet"),
+          SheetManager.hide("Stock_Sell_OrderType_Sheet"),
+          SheetManager.hide("SellOrderTypeSheet_Sheet")
+        ]).then(() => {
+          console.log("✅ All sheets closed!");
+        }).catch(err => console.error("❌ Error closing sheets:", err));
+      
+
+        }}
+        style={{
+            height: size(55),
+            width: size(55),
+            marginLeft: width(5),
+            backgroundColor:  CurrentViewMode.Mode_ButtonColor_Profile,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 10,
+        }}>
+            <MaterialIcons name="arrow-back-ios" style={{
+                fontSize: size(18),
+                color: CurrentViewMode.Mode_fontColor,
+
+            }} />
+        </TouchableOpacity>
 
 
 
@@ -1375,21 +1495,26 @@ return(
     
             <TouchableOpacity onPress={() => {
              
+             posthog.capture('open_stock_sell_confirmation_bottomsheet', {
+              screen: 'Stock_SellAmounts_Sheet',
+              $screen_name: 'Stock_SellAmounts_Sheet '+" / "+coinData.name,
+              timestamp: new Date().toISOString(),
+              })
            
               SheetManager.show("Stock_SellConfirmation_Sheet");
          
             }}
             disabled={value == 0 || AbleToBuy == false ? true : false}
             style={{
-              marginTop: 20,
+      
               height: 50,
               backgroundColor: CurrentViewMode.Mode_fontColor,
               borderRadius: 10,
               position: 'absolute',
-              bottom: height(6),
+            
             //  width: width(35),
               paddingHorizontal: 30,
-              right: width(7),
+              marginLeft: width(64),
               opacity: value == 0 || AbleToBuy == false  ? 0.3 :  100,
               flexDirection: 'row',
               alignItems: 'center',

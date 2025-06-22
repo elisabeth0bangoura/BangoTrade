@@ -52,6 +52,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
 import { TextInput } from 'react-native-gesture-handler';
+import { usePostHog } from 'posthog-react-native';
 
 import {
 	Onfido,
@@ -79,6 +80,7 @@ const documentId = 'b7e0f8af-9e06-4751-b502-a7ac44655e86';  // Example document 
 
 
 export default function Personal_DataSheet () {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t } = useTranslation();
 
@@ -137,6 +139,21 @@ export default function Personal_DataSheet () {
      const database = getDatabase();
   
   
+
+
+
+
+
+
+
+
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'PersonalData_Sheet',
+        $screen_name: 'PersonalData_Sheet',
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
      
   
   
@@ -360,6 +377,14 @@ export default function Personal_DataSheet () {
   
   
   <TouchableOpacity onPress={() => {
+
+posthog.capture('open_change_phone_number_bottomsheet', {
+  screen: 'PersonalData_Sheet',
+  $screen_name: 'PersonalData_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
    SheetManager.show("ChnagePhoneNUmber_Sheet")
   }} style={{
     flexDirection: 'row',
@@ -420,6 +445,14 @@ export default function Personal_DataSheet () {
   
   
   <TouchableOpacity onPress={() => {
+
+
+posthog.capture('open_change_email_address_bottomsheet', {
+  screen: 'PersonalData_Sheet',
+  $screen_name: 'PersonalData_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
   
   SheetManager.show("ChnageEmailAddress_Sheet")
   }} style={{

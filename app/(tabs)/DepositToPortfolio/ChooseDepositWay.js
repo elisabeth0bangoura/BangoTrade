@@ -44,6 +44,7 @@ import { ViewModeContext } from '@/app/Context/ViewModeContext';
 import { getFirestore, doc, getDoc } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
 import { getAuth, signOut, signInWithEmailAndPassword, onAuthStateChanged } from "@react-native-firebase/auth";
+import { usePostHog } from 'posthog-react-native';
 
 const HEADER_HEIGHT = 300; // The height of the header
 
@@ -72,6 +73,8 @@ const HEADER_HEIGHT = 300; // The height of the header
 const ChooseDepositWay =  React.memo(({ AssetSupply}) => {
 
 
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const router = useRouter();
   const auth = getAuth();
@@ -174,7 +177,16 @@ const ChooseDepositWay =  React.memo(({ AssetSupply}) => {
     
     
     
-
+    
+      useEffect(() => {
+        posthog.capture('screen_viewed', {
+          screen: 'ChooseDepositWay',
+          $screen_name: 'ChooseDepositWay',
+          timestamp: new Date().toISOString(),
+        });
+      }, []);
+      
+      
       
 
 
@@ -787,6 +799,14 @@ const ChooseDepositWay =  React.memo(({ AssetSupply}) => {
         </Text>
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture('open_deposit_bottomsheet', {
+            screen: 'ChooseDepositWay',
+            $screen_name: 'ChooseDepositWay',
+            timestamp: new Date().toISOString(),
+            
+          });
+
           SheetManager.show("Deposit_Sheet")
         }}
         style={{

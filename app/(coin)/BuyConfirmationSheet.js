@@ -45,6 +45,7 @@ import { IFollowingsCoinsContext } from '../Context/OpenIFollowingsCoinsSheetCon
 import { SearchContext } from '../Context/MainSearchIndexStateContext';
 import { ToastMessageContext } from '../Context/ToastMessageContext';
 import { ViewModeContext } from '../Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -74,6 +75,7 @@ import { CashContext } from '../Context/CashContext';
 
 export const BuyOrderTypeSheetPage = () => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t } = useTranslation();
 
@@ -377,7 +379,8 @@ export const BuyOrderTypeSheetPage = () => {
 const BuyConfirmationSheet =  React.memo(() => {
    
 
-  
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
   const { t } = useTranslation();
 
   const currentUser = auth().currentUser;
@@ -515,6 +518,13 @@ const BuyConfirmationSheet =  React.memo(() => {
 
 
  const CloseAddMoneyToAccountSheet = () => {
+
+  posthog.capture('did_not_finish_checkout_buying_crypto_asset', {
+    screen: 'BuyConfirmation_Sheet',
+    $screen_name: 'BuyConfirmation_Sheet '+" / "+coinData.name,
+    timestamp: new Date().toISOString(),
+    });
+
   SheetManager.hide("BuyConfirmation_Sheet");
 
   setBuyConfirmationSheetIndex(-1)
@@ -530,6 +540,29 @@ const BuyConfirmationSheet =  React.memo(() => {
   }, [BuyConfirmationSheetIndex]);
 
   */
+
+
+
+
+
+
+
+
+
+
+
+
+ useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'BuyConfirmation_Sheet',
+    $screen_name: 'BuyConfirmation_Sheet '+" / "+coinData.name,
+    timestamp: new Date().toISOString(),
+  });
+}, []);
+
+
+
+
 
 
 
@@ -1275,6 +1308,14 @@ const BuyCrypto = async () => {
 
          // ✅ Mark that an order was placed
          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+
+         posthog.capture('successfully_finish_checkout_crypto_buying_asset', {
+          screen: 'BuyConfirmation_Sheet',
+          $screen_name: 'BuyConfirmation_Sheet '+" / "+coinData.name,
+          timestamp: new Date().toISOString(),
+          });
+
 
         // ✅ Step 2: wait for toast to show (you can adjust 600ms to match your animation)
         setTimeout(() => {

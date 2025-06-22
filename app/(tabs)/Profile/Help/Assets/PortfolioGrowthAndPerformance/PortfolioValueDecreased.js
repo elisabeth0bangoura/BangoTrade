@@ -29,6 +29,7 @@ import ActionSheet, {useSheetRef, SheetManager} from 'react-native-actions-sheet
 import { HomeChartContext } from '../../../../../Context/HomeChartContext';
 import { useRouter } from 'expo-router';
 
+import { usePostHog } from 'posthog-react-native';
 
 import RNPickerSelect from "react-native-picker-select";
 
@@ -58,6 +59,7 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 export default function PortfolioValueDecreasedSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -78,7 +80,7 @@ export default function PortfolioValueDecreasedSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const PortfolioValueDecreased_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -673,7 +675,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={PortfolioValueDecreased_Sheet}
         gestureEnabled={true}
         isModal={false}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -841,15 +843,22 @@ please reach out to us by selecting the relevant investment under Current Invest
   <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
 
 <TouchableOpacity onPress={() => {
-          
+
+
+          posthog.capture('close_portfolio_value_decreased_Sheet', {
+            screen: 'PortfolioValueDecreased_Sheet',
+            $screen_name: 'PortfolioValueDecreased_Sheet',
+            timestamp: new Date().toISOString(),
+            });
+  
       
-      SheetManager.hide("PortfolioGrowthPerformance_Sheet"); // Now hide the sheet after a delay
+      SheetManager.hide("PortfolioValueDecreased_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

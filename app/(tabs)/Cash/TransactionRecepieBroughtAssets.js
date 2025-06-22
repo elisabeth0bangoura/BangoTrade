@@ -44,6 +44,7 @@ import { opacity } from 'react-native-redash';
 import { TrasnactionReceipeContext } from '@/app/Context/TrasnactionReceipeContext';
 import { DateTime } from 'luxon';
 import PdfRendererView from 'react-native-pdf-renderer';  // Ensure this is installed and linked
+import { usePostHog } from 'posthog-react-native';
 
 
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
@@ -76,6 +77,7 @@ const HEADER_HEIGHT = 300; // The height of the header
 
 
 const TransactionRecepieBroughtAssets =  React.memo((props) => {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
@@ -140,6 +142,17 @@ const TransactionRecepieBroughtAssets =  React.memo((props) => {
 
 
 
+
+
+
+
+useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'TransactionRecepieBroughtAssets_Sheet',
+    $screen_name: 'TransactionRecepieBroughtAssets_Sheet',
+    timestamp: new Date().toISOString(),
+  });
+}, []);
 
 
 
@@ -847,7 +860,17 @@ const formatPrice = (price) => {
 
 
 
-<TouchableOpacity style={{
+<TouchableOpacity onPress={() => {
+
+posthog.capture('open_transaction_brought_assets_bottomsheet', {
+  screen: 'TransactionRecepieBroughtAssets_Sheet',
+  $screen_name: 'TransactionRecepieBroughtAssets_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
+}}
+style={{
   height: height(18),
     marginTop: height(3),
     borderRadius: 15,
@@ -897,6 +920,14 @@ const formatPrice = (price) => {
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_transaction_billing_bottomsheet', {
+  screen: 'TransactionRecepieBroughtAssets_Sheet',
+  $screen_name: 'TransactionRecepieBroughtAssets_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
   SheetManager.show("Billing_Sheet")
 }}
 style={{

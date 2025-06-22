@@ -47,6 +47,7 @@ import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot  } from "@rea
 import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -60,6 +61,7 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 
 export default function StatementsDateTypeCrypto () {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
   const router = useRouter();
@@ -126,6 +128,21 @@ export default function StatementsDateTypeCrypto () {
   
   
   
+
+
+
+
+
+
+      useEffect(() => {
+        posthog.capture('screen_viewed', {
+          screen: 'StatementsDateTypeCrypto_Sheet',
+          $screen_name: 'StatementsDateTypeCrypto_Sheet',
+          timestamp: new Date().toISOString(),
+        });
+      }, []);
+
+
   
   
     useEffect(() => {

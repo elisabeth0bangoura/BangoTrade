@@ -28,6 +28,7 @@ import ActionSheet, {useSheetRef, ScrollView, SheetManager} from 'react-native-a
 
 import { HomeChartContext } from '../../../../../Context/HomeChartContext';
 import { useRouter } from 'expo-router';
+import { usePostHog } from 'posthog-react-native';
 
 
 import RNPickerSelect from "react-native-picker-select";
@@ -58,6 +59,8 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 export default function CapitalManagementSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
 
 	const router = useRouter();
@@ -78,7 +81,7 @@ export default function CapitalManagementSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const CapitalManagement_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -129,6 +132,16 @@ export default function CapitalManagementSheet () {
 
   
 
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'CapitalManagement_Sheet',
+      $screen_name: 'CapitalManagement_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 
@@ -330,6 +343,15 @@ const filteredCategories = selectedCategory
           {item.subcategories &&
           item.subcategories.map((subcategory, index) => (
                 <TouchableOpacity onPress={() => {
+
+                  posthog.capture(`clicked_help_captial_managment_${subcategory.linkName}_bottomsheet`, {
+                    screen: 'CapitalManagement_Sheet',
+                    $screen_name: 'CapitalManagement_Sheet',
+                    timestamp: new Date().toISOString(),
+                
+                    });
+  
+                    
                   SheetManager.show(subcategory.linkName)
                 }}
                 key={index} style={{
@@ -381,97 +403,6 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
 
 
 
-   // Render List of Alpaca positions with Coingecko data
-   const MyInvestmentsrenderItem = ({ item }) => {
-    // Determine the value you want to check: daily_change_in_dollars, daily_change_percentage, since_brought_in_dollars, or since_brought_in_percentage
-    let changeValue;
-    let changeSymbol = '';
-    let displayValue = '';
-    
-    if (MetricsState === "Daily trend dollar") {
-      changeValue = item.daily_change_in_dollars;
-      changeSymbol = changeValue >= 0 ? '▲' : '▼';
-      displayValue = formatMoneyMyInvestmnt(item.daily_change_in_dollars);
-    } else if (MetricsState === "Daily trend percentage") {
-      changeValue = item.daily_change_percentage;
-      changeSymbol = changeValue >= 0 ? '▲' : '▼';
-      displayValue = `${changeValue.toFixed(2)}%`;
-    } else if (MetricsState === "Since brought dollar") {
-      changeValue = item.since_brought_in_dollars;
-      changeSymbol = changeValue >= 0 ? '▲' : '▼';
-      displayValue = formatMoneyMyInvestmnt(item.since_brought_in_dollars);
-    } else if (MetricsState === "Since brought percentage") {
-      changeValue = item.since_brought_in_percentage;
-      changeSymbol = changeValue >= 0 ? '▲' : '▼';
-      displayValue = `${changeValue.toFixed(2)}%`;
-    }
-  
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          // Handle item press if needed
-          setCoinPageIndex(0);
-          SheetManager.show('CoinPage_Sheet');
-          setCurrentCoinSelected(item);
-        }}
-        style={{
-          height: height(8),
-          width: "auto",
-          paddingRight: width(5),
-          alignItems: 'center',
-          marginLeft: width(5),
-        }}
-      >
-        <View
-          style={{
-            height: size(25),
-            width: size(25),
-            borderRadius: size(25) / 2,
-            overflow: 'hidden',
-          }}
-        >
-          {/* Display Coin Image */}
-          <Image
-            source={{ uri: item.image || '' }}
-            style={{
-              height: '100%',
-              width: '100%',
-            }}
-          />
-        </View>
-  
-        <View style={{ }}>
-          {/* Display Coin Name */}
-          <Text style={{ fontSize: size(16), alignSelf: 'center', marginTop: height(1), color: CurrentViewMode.Mode_fontColor, fontWeight: 'bold' }}>
-            {item.name}
-          </Text>
-  
-          <View style={{ flexDirection: 'row', }}>
-            {/* Display Price Change */}
-            <Text
-              style={{
-                fontSize: size(15),
-                marginTop: height(1),
-                alignSelf: 'center',
-              
-                color: changeValue >= 0 ? '#00CE39' : '#FF1B1E', // Green for positive, red for negative
-                fontWeight: '900',
-              }}
-            >
-              {changeSymbol} {displayValue}
-            </Text>
-          </View>
-  
-          {/* Display Quantity and Market Value */}
-          <Text style={{ fontSize: size(14), marginTop: height(3), color: CurrentViewMode.Mode_Sec_fontColor, fontWeight: 'bold' }}>
-            {formatMoneyMyInvestmnt(item.market_value)}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-  
-
 
 
 
@@ -498,7 +429,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={CapitalManagement_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -590,6 +521,15 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
 
 
         <TouchableOpacity onPress={() => {
+
+            posthog.capture(`open_annual_tax_report_sheet_bottomsheet`, {
+              screen: 'CapitalManagement_Sheet',
+              $screen_name: 'CapitalManagement_Sheet',
+              timestamp: new Date().toISOString(),
+
+              });
+
+
             SheetManager.show("AnnualTaxReport_Sheet")
         }}
         style={{
@@ -642,6 +582,15 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
 
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture(`open_portfolio_account_sheet_bottomsheet`, {
+            screen: 'CapitalManagement_Sheet',
+            $screen_name: 'CapitalManagement_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
+
             SheetManager.show("PortfolioAccount_Sheet")
         }}
         style={{
@@ -696,6 +645,14 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
 
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture(`open_assets_legal_documents_bottomsheet`, {
+            screen: 'CapitalManagement_Sheet',
+            $screen_name: 'CapitalManagement_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
             SheetManager.show("Assets_LegalDocuments_Sheet")
         }}
         style={{
@@ -774,15 +731,22 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
  <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
 
 <TouchableOpacity onPress={() => {
           
+
+          posthog.capture(`close_capital_management_bottomsheet`, {
+            screen: 'CapitalManagement_Sheet',
+            $screen_name: 'CapitalManagement_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
       
-      SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
+      SheetManager.hide("CapitalManagement_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

@@ -46,6 +46,7 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 
 import { ReanimatedScrollView } from 'react-native-reanimated'; // If you want scroll-based animations
 import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -57,6 +58,8 @@ import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 're
 
 export default function ProfileHelpSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
 
 	const router = useRouter();
@@ -77,7 +80,7 @@ export default function ProfileHelpSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const ProfileHelp_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -122,6 +125,17 @@ export default function ProfileHelpSheet () {
         "Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA==",
     },
   };
+  
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'ProfileHelp_Sheet',
+      $screen_name: 'ProfileHelp_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
   
 
   
@@ -326,6 +340,15 @@ const filteredCategories = selectedCategory
           {item.subcategories &&
           item.subcategories.map((subcategory, index) => (
                 <TouchableOpacity onPress={() => {
+
+                  posthog.capture(`clicked_help_profile_${subcategory.linkName}_bottomsheet`, {
+                    screen: 'Help_Sheet',
+                    $screen_name: 'Help_Sheet',
+                    timestamp: new Date().toISOString(),
+                
+                    });
+                
+
                   SheetManager.show(subcategory.linkName)
                 }}
                 key={index} style={{
@@ -365,7 +388,7 @@ const filteredCategories = selectedCategory
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={ProfileHelp_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -470,7 +493,15 @@ const filteredCategories = selectedCategory
        }
        
        {categories.map((category, index) => (
-          <TouchableOpacity key={index} onPress={() => handleCategoryPress(category.name)}
+          <TouchableOpacity key={index} onPress={() => {
+            posthog.capture(`clicked_help_profile_filter_${category.name}_bottomsheet`, {
+              screen: 'Help_Sheet',
+              $screen_name: 'Help_Sheet',
+              timestamp: new Date().toISOString(),
+          
+              });
+            handleCategoryPress(category.name)
+          }}
           style={{
             marginRight: width(5),
             paddingHorizontal: size(20),

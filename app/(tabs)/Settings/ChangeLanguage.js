@@ -55,6 +55,7 @@ import { HomeContext } from '../../Context/HomeContext';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import CountryFlag from "react-native-country-flag";
+import { usePostHog } from 'posthog-react-native';
 
 import { TextInput } from 'react-native-gesture-handler';
 
@@ -86,6 +87,11 @@ const documentId = 'b7e0f8af-9e06-4751-b502-a7ac44655e86';  // Example document 
 
 
 export default function ChangeLanguage() {
+
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const db = getDatabase();
 
@@ -146,6 +152,19 @@ export default function ChangeLanguage() {
 
    
   
+  
+
+
+
+
+
+   useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'ChangeLanguage_Sheet',
+      $screen_name: 'ChangeLanguage_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
   
 
       
@@ -368,7 +387,18 @@ export default function ChangeLanguage() {
 
 
 
-      <TouchableOpacity onPress={() => handleLanguageChange('de')} // Switch language to English
+      <TouchableOpacity onPress={() => {
+
+        posthog.capture('clicked_saved_language_de_button', {
+          screen: 'ChangeLanguage_Sheet',
+          $screen_name: 'ChangeLanguage_Sheet',
+          timestamp: new Date().toISOString(),
+
+          });
+
+        handleLanguageChange('de')
+      
+      }} // Switch language to English
 
 			style={{
 				paddingVertical: size(12),
@@ -446,7 +476,17 @@ export default function ChangeLanguage() {
 			
 
 
-			<TouchableOpacity onPress={() => handleLanguageChange('en')}
+			<TouchableOpacity onPress={() => {
+
+        posthog.capture('clicked_saved_language_en_button', {
+          screen: 'ChangeLanguage_Sheet',
+          $screen_name: 'ChangeLanguage_Sheet',
+          timestamp: new Date().toISOString(),
+
+          });
+
+        handleLanguageChange('en')
+      }}
 			style={{
 				paddingVertical: size(12),
 				
@@ -522,7 +562,17 @@ export default function ChangeLanguage() {
 			
 
 
-			<TouchableOpacity onPress={() => handleLanguageChange('fr')}
+			<TouchableOpacity onPress={() => {
+
+      posthog.capture('clicked_saved_language_fr_button', {
+        screen: 'ChangeLanguage_Sheet',
+        $screen_name: 'ChangeLanguage_Sheet',
+        timestamp: new Date().toISOString(),
+
+        });
+
+        handleLanguageChange('fr')
+      }}
 			style={{
 				paddingVertical: size(12),
 				

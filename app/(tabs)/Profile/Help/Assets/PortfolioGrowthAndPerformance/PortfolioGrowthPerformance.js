@@ -43,6 +43,7 @@ import firestore from '@react-native-firebase/firestore';
 import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot } from "@react-native-firebase/firestore";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 import { ReanimatedScrollView } from 'react-native-reanimated'; // If you want scroll-based animations
 import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
@@ -60,6 +61,11 @@ import { CurrentCoinSelectedContext } from '@/app/Context/CurrentCoinSelectedCon
 
 export default function PortfolioGrowthPerformanceSheet () {
   
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
+
 
 
 	const router = useRouter();
@@ -105,7 +111,13 @@ export default function PortfolioGrowthPerformanceSheet () {
 
   
 
-
+ useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'PortfolioGrowthPerformanceSheet',
+      $screen_name: 'PortfolioGrowthPerformanceSheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 
@@ -564,6 +576,14 @@ const filteredCategories = selectedCategory
           {item.subcategories &&
           item.subcategories.map((subcategory, index) => (
                 <TouchableOpacity onPress={() => {
+
+                  posthog.capture(`clicked_help_asset_portfolio_growth_performance_${subcategory.linkName}_bottomsheet`, {
+                    screen: 'PortfolioGrowthPerformanceSheet',
+                    $screen_name: 'PortfolioGrowthPerformanceSheet',
+                    timestamp: new Date().toISOString(),
+                
+                    });
+
                   SheetManager.show(subcategory.linkName)
                 }}
                 key={index} style={{
@@ -644,10 +664,18 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
       <TouchableOpacity
         onPress={() => {
           // Handle item press if needed
-   
+  
 
           if(item.asset_class == "us_equity") {
         
+
+        posthog.capture('open_stock_bottomsheet', {
+          screen: 'PortfolioGrowthPerformanceSheet',
+          $screen_name: 'PortfolioGrowthPerformanceSheet '+" / "+item.name,
+          timestamp: new Date().toISOString(),
+      
+          });
+
             setCoinPageIndex(0)
             SheetManager.show('StockPage_Sheet',  {
               payload: { value: item.symbol }, // Passing dynamic data (payload)
@@ -664,6 +692,16 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
            } 
            if(item.asset_class == "crypto") {
+
+
+
+        posthog.capture('open_coin_bottomsheet', {
+          screen: 'PortfolioGrowthPerformanceSheet',
+          $screen_name: 'PortfolioGrowthPerformanceSheet '+" / "+item.name,
+          timestamp: new Date().toISOString(),
+      
+          });
+
      
             SheetManager.show('CoinPage_Sheet',  {
               payload: { value: item.symbol }, // Passing dynamic data (payload)
@@ -947,18 +985,23 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
 
 
 
-  <View style={{
-width: "100%",
-position: 'absolute',
-  bottom: height(5),
-   flexDirection: 'row',
-}}>
+      <View style={{
+         width: "100%",
+          position: 'absolute',
+          bottom: height(8),
+          flexDirection: 'row',
+        }}>
 
 
-<TouchableOpacity onPress={() => {
+      <TouchableOpacity onPress={() => {
           
-      
-      SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
+        posthog.capture('close_portfolio_growth_performance_Sheet', {
+          screen: 'PortfolioGrowthPerformanceSheet',
+          $screen_name: 'PortfolioGrowthPerformanceSheet',
+          timestamp: new Date().toISOString(),
+          });
+
+        SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

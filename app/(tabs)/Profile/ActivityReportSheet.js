@@ -51,6 +51,7 @@ import { getFirestore, doc, getDoc,  addDoc, collection, onSnapshot } from "@rea
 import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -63,6 +64,7 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 export const ActivityReportSheet = () => {
   
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -96,6 +98,22 @@ export const ActivityReportSheet = () => {
     const [ClearingAccountValue, setClearingAccountValue] = useState()
     const [PortfolioTotal, setPortfolioTotal] = useState()
   
+
+
+
+
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'ActivityReport_Sheet',
+        $screen_name: 'ActivityReport_Sheet',
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+    
+  
+
+
+
 
     
   

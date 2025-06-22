@@ -21,6 +21,7 @@ import AllAssets_Overview from './AllAssets_Overview';
 import { AnalyticsContext } from '@/app/Context/AnalyticsContext';
 import ETFsPieChart from './ETFsPieChart';
 import OptionsPieChart from './OptionsPieChart';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -41,6 +42,7 @@ const HeaderHeight = 0;
 
 const CollapsibleTabView = () => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const {
     FilterState, 

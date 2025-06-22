@@ -29,6 +29,7 @@ import  { Keyframe, SlideInDown, SlideOutUp } from 'react-native-reanimated';
 import { PanGestureHandler, GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import TabbedControl from 'react-native-tabbed-control';  // Import the tabbed control library
+import { usePostHog } from 'posthog-react-native';
 
 import PagerView from 'react-native-pager-view';
 import BottomSheet, { BottomSheetView, BottomSheetScrollView } from '@gorhom/bottom-sheet';
@@ -63,6 +64,8 @@ import { StockLineContext } from '@/app/Context/StockLineColor';
 
 // Component for Sort Following coins
 export default ViewMode = () => {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { t } = useTranslation();
 
@@ -92,6 +95,23 @@ const db = getDatabase();
 const calculatedHeight = windowHeight * 30;
 
 
+
+
+
+
+
+
+
+
+
+
+useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'ViewMode_Sheet',
+    $screen_name: 'ViewMode_Sheet',
+    timestamp: new Date().toISOString(),
+  });
+}, []);
 
 
 
@@ -212,6 +232,14 @@ style={{
         
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture('choosed_purple_rain_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
           setIsSystemTheme(false)
         }}
         style={{
@@ -250,6 +278,13 @@ style={{
 
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture('choosed_purple_rain_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
           setIsSystemTheme(true)
         }}
         style={{
@@ -299,6 +334,13 @@ style={{
         
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture('choosed_the_baddie_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
           setIsSystemTheme(false)
         }}
         style={{
@@ -337,7 +379,15 @@ style={{
         
 
 
-        <TouchableOpacity onPress={() => {
+        <TouchableOpacity onPress={() =>  {
+
+          posthog.capture('choosed_the_baddie_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
           setIsSystemTheme(true)
         }}
         style={{
@@ -389,6 +439,15 @@ style={{
         
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture('choosed_the_green_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
+
           setIsSystemTheme(false)
         }}
         style={{
@@ -428,6 +487,14 @@ style={{
 
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture('choosed_the_green_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
           setIsSystemTheme(true)
         }}
         style={{
@@ -495,6 +562,15 @@ style={{
         
 
         <TouchableOpacity onPress={() => {
+
+
+          posthog.capture('choosed_the_honey_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
           setIsSystemTheme(false)
         }}
         style={{
@@ -532,6 +608,14 @@ style={{
 
 
         <TouchableOpacity onPress={() => {
+
+
+          posthog.capture('choosed_the_honey_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
           setIsSystemTheme(true)
         }}
         style={{
@@ -590,6 +674,15 @@ style={{
         
 
         <TouchableOpacity onPress={() => {
+
+
+          posthog.capture('choosed_the_blue_based_color_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
           setIsSystemTheme(false)
         }}
         style={{
@@ -628,6 +721,13 @@ style={{
 
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture('choosed_the_blue_based_color_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
           setIsSystemTheme(true)
         }}
         style={{
@@ -696,6 +796,14 @@ style={{
         
 
         <TouchableOpacity onPress={() => {
+
+
+          posthog.capture('choosed_gray_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
           setIsSystemTheme(false)
         }}
         style={{
@@ -735,6 +843,15 @@ style={{
 
 
         <TouchableOpacity onPress={() => {
+
+
+          posthog.capture('choosed_gray_theme_bottomsheet', {
+            screen: 'ViewMode_Sheet',
+            $screen_name: 'ViewMode_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+            
           setIsSystemTheme(true)
         }}
         style={{

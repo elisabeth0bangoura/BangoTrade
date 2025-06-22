@@ -41,6 +41,7 @@ import { BuyConfirmationSheetContext } from '../../Context/BuyConfirmationSheetC
 
 import ActionSheet, {useSheetRef, FlatList, ScrollView, SheetManager} from 'react-native-actions-sheet';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 import { getFirestore, doc, getDoc, collection, setDoc   } from "@react-native-firebase/firestore";
@@ -75,6 +76,8 @@ const HEADER_HEIGHT = 300; // The height of the header
 const Deposit =  React.memo(({ AssetSupply}) => {
 
 
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const router = useRouter();
   const auth = getAuth();
@@ -173,13 +176,27 @@ const Deposit =  React.memo(({ AssetSupply}) => {
       
     
     
-    
+      useEffect(() => {
+        posthog.capture('screen_viewed', {
+          screen: 'Deposit',
+          $screen_name: 'Deposit',
+          timestamp: new Date().toISOString(),
+        });
+      }, []);
+      
       
 
+
+
+
+
+
+
+
+
+
+
       useEffect(() => {
-
-
-        
 
       const fetchUserData = async () => {
         try {
@@ -782,11 +799,18 @@ const Deposit =  React.memo(({ AssetSupply}) => {
   
   
           <View style={{
-            marginTop: height(20)
+            marginTop: height(18)
           }}>
   
        
           <TouchableOpacity onPress={() => {
+
+        posthog.capture('did_not_finish_deposit_transfer', {
+          screen: 'Deposit',
+          $screen_name: 'Deposit',
+          timestamp: new Date().toISOString(),
+          });
+
           SheetManager.hide("Deposit_Sheet")
           }}
           style={{
@@ -828,13 +852,13 @@ const Deposit =  React.memo(({ AssetSupply}) => {
 
 
 
-console.log({
-  transfer_type: 'ach',
-  direction: 'INCOMING',
-  timing: 'immediate',
-  relationship_id: RealtionshipId,
-  amount: rawValue
-})
+            console.log({
+              transfer_type: 'ach',
+              direction: 'INCOMING',
+              timing: 'immediate',
+              relationship_id: RealtionshipId,
+              amount: rawValue
+            })
                 setShowTrasnferBtn(false)
             
          const options = {
@@ -857,8 +881,16 @@ console.log({
                 .then(res => res.json())
                 .then(res => {
 
-
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+
+
+
+                posthog.capture('successfully_finish_deposit_transfer', {
+                  screen: 'Deposit',
+                  $screen_name: 'Deposit',
+                  timestamp: new Date().toISOString(),
+                  });
+
                     console.log(res)
                     setShowToastDeposit(true); // ✅ Make sure this updates before sheets close
                    SheetManager.hide("Deposit_Sheet")

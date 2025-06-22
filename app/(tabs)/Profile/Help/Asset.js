@@ -39,6 +39,7 @@ import * as Sharing from 'expo-sharing';
 import { ViewModeContext } from '../../../Context/ViewModeContext';
 
 import firestore from '@react-native-firebase/firestore';
+import { usePostHog } from 'posthog-react-native';
 
 import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot } from "@react-native-firebase/firestore";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
@@ -57,6 +58,8 @@ import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 're
 
 export default function AssetSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
 
 	const router = useRouter();
@@ -77,7 +80,7 @@ export default function AssetSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const Asset_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -108,6 +111,16 @@ export default function AssetSheet () {
     return monthYear === currentMonthYear ? t('ThisMonth') : monthYear;
   };
   
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Asset_Sheet',
+      $screen_name: 'Asset_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
+
 
 
   
@@ -277,6 +290,14 @@ const [selectedCategory, setSelectedCategory] = useState(null);
 
 // Handle category click (set selected category)
 const handleCategoryPress = (categoryName) => {
+
+  posthog.capture(`clicked_help_asset_filter_${categoryName}_bottomsheet`, {
+    screen: 'Help_Sheet',
+    $screen_name: 'Help_Sheet',
+    timestamp: new Date().toISOString(),
+
+    });
+
   setSelectedCategory(categoryName);
 };
 
@@ -307,7 +328,9 @@ const filteredCategories = selectedCategory
                   fontSize: size(15),
                   fontWeight: "bold",
                   color: CurrentViewMode.Mode_Sec_fontColor,
-                }}>{item.name}</Text>
+                }}>
+                  {item.name}
+                </Text>
           </TouchableOpacity>
 
           {/* Subcategories */}
@@ -317,6 +340,14 @@ const filteredCategories = selectedCategory
           {item.subcategories &&
           item.subcategories.map((subcategory, index) => (
                 <TouchableOpacity onPress={() => {
+
+                  posthog.capture(`open_help_asset_${subcategory.name}_bottomsheet`, {
+                    screen: 'Help_Sheet',
+                    $screen_name: 'Help_Sheet',
+                    timestamp: new Date().toISOString(),
+          
+                    });
+
                   SheetManager.show(subcategory.linkName)
                 }}
                 key={index} style={{
@@ -356,7 +387,7 @@ const filteredCategories = selectedCategory
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={Asset_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -461,7 +492,15 @@ const filteredCategories = selectedCategory
        }
        
        {categories.map((category, index) => (
-          <TouchableOpacity key={index} onPress={() => handleCategoryPress(category.name)}
+          <TouchableOpacity key={index} onPress={() => {
+            posthog.capture(`clicked_help_asset_filter_${category.name}_bottomsheet`, {
+              screen: 'Help_Sheet',
+              $screen_name: 'Help_Sheet',
+              timestamp: new Date().toISOString(),
+          
+              });
+            handleCategoryPress(category.name)
+          }}
           style={{
             marginRight: width(5),
             paddingHorizontal: size(20),
@@ -478,7 +517,9 @@ const filteredCategories = selectedCategory
                 alignSelf: 'center',
                 color:  selectedCategory === category.name ? CurrentViewMode.Mode_bg : CurrentViewMode.Mode_fontColor,
     
-            }}>{category.name}</Text>
+            }}>
+              {category.name}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

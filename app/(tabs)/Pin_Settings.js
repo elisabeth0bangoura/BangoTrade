@@ -49,6 +49,16 @@ export default function Pin_Settings() {
 
     const userId = currentUser ? currentUser.uid : null;
 
+
+
+
+
+
+
+
+
+
+
     const handleSetPin = async (enteredPin) => {
         try {
             if (!userId) {

@@ -53,6 +53,7 @@ import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
 import { CashContext } from '../Context/CashContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -377,6 +378,7 @@ export const SellOrderTypeSharesSheetPage = () => {
 
 
 const StockSellConfirmationShares_Sheet =  React.memo(() => {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
   const { t } = useTranslation();
@@ -521,7 +523,13 @@ const StockSellConfirmationShares_Sheet =  React.memo(() => {
 
 
   
-
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Stock_Page',
+      $screen_name: 'Stock_Page '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 
@@ -888,9 +896,16 @@ return(
 
   isModal={false} 
 
+
   backgroundInteractionEnabled={false}
   gestureEnabled={true}
   onClose={() => {
+
+    posthog.capture('closed_sheet', {
+      screen: 'Stock_SellConfirmationShares_Sheet',
+      $screen_name: 'Stock_SellConfirmationShares_Sheet '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
     toastTriggered.current = false;
     setShowToastSell(false); // ✅ hide toast
 
@@ -1246,7 +1261,22 @@ style={{
                bottom: height(6),
                flexDirection: 'row'
         }}>
-        <TouchableOpacity onPress={() => CloseAddMoneyToAccountSheet()}
+
+
+
+        <TouchableOpacity onPress={() => {
+        
+
+          posthog.capture('canceled_checkout_selling_asset', {
+            screen: 'Stock_SellConfirmationShares_Sheet',
+            $screen_name: 'Stock_SellConfirmationShares_Sheet '+" / "+coinData.name,
+            timestamp: new Date().toISOString(),
+            });
+
+
+            SheetManager.hide("Stock_SellConfirmationShares_Sheet")
+
+        }}
         style={{
             height: size(55),
             width: size(55),
@@ -1322,6 +1352,13 @@ const sellCrypto = async () => {
 
 
 
+        posthog.capture('successfully_finish_checkout_selling_asset', {
+          screen: 'Stock_SellConfirmationShares_Sheet',
+          $screen_name: 'Stock_SellConfirmationShares_Sheet '+" / "+coinData.name,
+          timestamp: new Date().toISOString(),
+          });
+
+
             Promise.all([
               SheetManager.hide("Stock_SellConfirmationShares_Sheet"),
               SheetManager.hide("Stock_SellAmounts_Sheet"),
@@ -1355,7 +1392,8 @@ sellCrypto()
   style={{
     height: size(55),
     // width: width(35),
-    marginLeft: width(47),
+    position: 'absolute',
+    marginLeft: width(64),
     paddingHorizontal: size(20),
     backgroundColor: CurrentViewMode.Mode_fontColor,
     alignItems: 'center',

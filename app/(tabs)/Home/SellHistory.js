@@ -48,6 +48,7 @@ import { getFirestore, addDoc,getDoc, collection, doc, onSnapshot } from "@react
 import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -72,6 +73,9 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 // Component for Sort Following coins
 export default SellHistory = () => {
 
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const router = useRouter();
   const auth = getAuth();
@@ -114,6 +118,13 @@ const [UserLastName, setUserLastName] = useState("")
 
 
 
+useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'SellHistory',
+    $screen_name: 'SellHistory',
+    timestamp: new Date().toISOString(),
+  });
+}, []);
 
 
 

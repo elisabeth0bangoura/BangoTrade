@@ -43,6 +43,7 @@ import firestore from '@react-native-firebase/firestore';
 import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot } from "@react-native-firebase/firestore";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 import { ReanimatedScrollView } from 'react-native-reanimated'; // If you want scroll-based animations
 import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
@@ -58,6 +59,8 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 export default function TradabilityOfCryptosAndEventsSheet () {
   
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -78,7 +81,7 @@ export default function TradabilityOfCryptosAndEventsSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const TradabilityOfCryptosAndEvents_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -131,6 +134,13 @@ export default function TradabilityOfCryptosAndEventsSheet () {
 
 
 
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'TradabilityOfCryptosAndEvents_Sheet',
+      $screen_name: 'TradabilityOfCryptosAndEvents_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 
@@ -498,7 +508,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={TradabilityOfCryptosAndEvents_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -609,7 +619,7 @@ including all relevant details and the timing of such events.
  <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
@@ -664,21 +674,27 @@ including all relevant details and the timing of such events.
 
 
 
-<TouchableOpacity onPress={() => {
-          
+      <TouchableOpacity onPress={() => {
+
+         posthog.capture('close_tradability_of_Cryptos_and_events_Sheet', {
+              screen: 'TradabilityOfCryptosAndEvents_Sheet',
+              $screen_name: 'TradabilityOfCryptosAndEvents_Sheet',
+              timestamp: new Date().toISOString(),
+            });
+        
       
-      SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
-              
-      }}
-        style={{
-          backgroundColor: CurrentViewMode.Mode_ButtonColor_Profile,
-          height: size(50),
-          borderRadius: 10,
-          width:  size(50),
-          marginLeft: width(5),
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
+            SheetManager.hide("TradabilityOfCryptosAndEvents_Sheet"); // Now hide the sheet after a delay
+
+          }}
+            style={{
+              backgroundColor: CurrentViewMode.Mode_ButtonColor_Profile,
+              height: size(50),
+              borderRadius: 10,
+              width:  size(50),
+              marginLeft: width(5),
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
 
           <MaterialIcons name='keyboard-arrow-left' style={{
             color: CurrentViewMode.Mode_fontColor,

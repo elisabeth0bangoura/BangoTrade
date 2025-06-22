@@ -43,6 +43,8 @@ import { opacity } from 'react-native-redash';
 import { TrasnactionReceipeContext } from '@/app/Context/TrasnactionReceipeContext';
 import { DateTime } from 'luxon';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
+
 
 
 
@@ -73,6 +75,7 @@ const HEADER_HEIGHT = 300; // The height of the header
 const TransactionRecepieDeposit =  React.memo((props) => {
 
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
 
@@ -135,6 +138,35 @@ const statementIdMatch = selectedItem.description.match(/statement_id:\s([a-f0-9
 
 // If a match is found, extract the statement_id
 const statementId = statementIdMatch ? statementIdMatch[1] : null;
+
+
+
+
+
+
+
+
+
+
+
+
+
+useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'TransactionRecepieDeposit_Sheet',
+    $screen_name: 'TransactionRecepieDeposit_Sheet',
+    timestamp: new Date().toISOString(),
+  });
+}, []);
+
+
+
+
+
+
+
+
+
 
 // Log the statement_id
 console.log("Statement ID: ", statementId);
@@ -878,6 +910,14 @@ console.log("Statement ID: ", statementId);
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_transaction_confirmation_bottomsheet', {
+  screen: 'TransactionRecepieDeposit_Sheet',
+  $screen_name: 'TransactionRecepieDeposit_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
   SheetManager.show("TransactionConfirmation_Sheet")
 }}
 style={{

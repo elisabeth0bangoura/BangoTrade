@@ -45,6 +45,7 @@ import ActionSheet, {useSheetRef, FlatList, ScrollView, SheetManager} from 'reac
 import { ViewModeContext } from '../Context/ViewModeContext';
 import { t } from 'i18next';
 import { ToastMessageContext } from '../Context/ToastMessageContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -89,6 +90,8 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 
 
 export const StockBuyAmountTypeSheetPage = () => {
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t } = useTranslation();
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -411,6 +414,8 @@ export const StockBuyAmountTypeSheetPage = () => {
 
 const StockAmountsheet =  React.memo(({ AssetSupply}) => {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
   const { t } = useTranslation();
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -500,6 +505,15 @@ const StockAmountsheet =  React.memo(({ AssetSupply}) => {
 
 
    
+
+useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'StockMoneyAmount_Sheet',
+    $screen_name: 'StockMoneyAmount_Sheet '+" / "+coinData.name,
+    timestamp: new Date().toISOString(),
+  });
+}, []);
+
 
 
 
@@ -789,7 +803,8 @@ const handleOpenBuyerConfirmation = () => {
   
   const handlePress = (key) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  
+
+
     let newRawValue = rawValue;
   
     if (key === 'backspace') {
@@ -955,6 +970,12 @@ return(
   gestureEnabled={true}
 
   onClose={() => {
+
+    posthog.capture('closed_sheet', {
+      screen: 'StockMoneyAmount_Sheet',
+      $screen_name: 'StockMoneyAmount_Sheet '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
     setValue("0")
     setRawValue("0")
     setValueShares("0")
@@ -1124,11 +1145,47 @@ return(
 
         
 
-
-
-        <View style={{
-          marginTop: height(15)
+<View style={{
+               position: 'absolute',
+               bottom: height(-8),
+               flexDirection: 'row'
         }}>
+
+    <TouchableOpacity onPress={() => {
+
+    posthog.capture('canceled_stockmoneyamount_Sheet', {
+      screen: 'StockMoneyAmount_Sheet',
+      $screen_name: 'StockMoneyAmount_Sheet '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
+
+    SheetManager.hide("StockMoneyAmount_Sheet")
+    }}
+        style={{
+            height: size(55),
+            width: size(55),
+            marginLeft: width(5),
+            backgroundColor: CurrentViewMode.Mode_ButtonColor_Profile,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 10,
+        }}>
+            <MaterialIcons name="arrow-back-ios" style={{
+                fontSize: size(18),
+                color: CurrentViewMode.Mode_fontColor,
+
+            }} />
+        </TouchableOpacity>
+
+
+
+
+
+
+
+
+
+
 
     
            {/* Submit Button */}
@@ -1139,21 +1196,29 @@ return(
               if(AbleToBuy == false) {
                 null
             } else {
+
+            posthog.capture('open_stock_buy_confirmation_bottomsheet', {
+              screen: 'StockBuyConfirmation_Sheet',
+              $screen_name: 'StockBuyConfirmation_Sheet '+" / "+coinData.name,
+              timestamp: new Date().toISOString(),
+              });
+
+
               SheetManager.show("StockBuyConfirmation_Sheet");
             }
    
             }}
             disabled={value == 0 || AbleToBuy == false ? true : false}
             style={{
-              marginTop: 20,
+      
               height: 50,
               backgroundColor:  CurrentViewMode.Mode_fontColor,
               borderRadius: 10,
               position: 'absolute',
-              bottom: height(6),
+       
               width: width(35),
               paddingHorizontal: 30,
-              right: width(7),
+              left: width(60),
               opacity: value == 0 || AbleToBuy == false  ? 0.3 :  100,
               flexDirection: 'row',
               alignItems: 'center',
@@ -1173,11 +1238,10 @@ return(
 
 
       
-      
+      </View>
 
    
   
-</View>
 
 
       </ActionSheet>

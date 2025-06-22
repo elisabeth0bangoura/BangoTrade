@@ -43,6 +43,7 @@ import firestore from '@react-native-firebase/firestore';
 import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot } from "@react-native-firebase/firestore";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 import CrispChat, {
   configure,
@@ -63,6 +64,7 @@ import CrispChat, {
 export default function ChatSheet () {
   
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 	const router = useRouter();
 	const auth = getAuth();
@@ -82,7 +84,7 @@ export default function ChatSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const Chat_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -121,7 +123,14 @@ export default function ChatSheet () {
   };
   
 
-
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Chat_Sheet',
+      $screen_name: 'Chat_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
   
   
  

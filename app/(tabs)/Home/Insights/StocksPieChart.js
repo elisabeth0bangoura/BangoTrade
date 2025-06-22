@@ -47,6 +47,7 @@ import { getFirestore, addDoc,getDoc, collection, doc, onSnapshot } from "@react
 import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -417,6 +418,7 @@ const StocksPieChart = () => {
 
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const router = useRouter();
   const auth = getAuth();
@@ -464,6 +466,14 @@ const formatPrice = (price) => {
 
 
 
+
+useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'StocksPieChart',
+    $screen_name: 'StocksPieChart',
+    timestamp: new Date().toISOString(),
+  });
+}, []);
 
 
 

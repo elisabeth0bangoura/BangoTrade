@@ -44,6 +44,7 @@ import firestore from '@react-native-firebase/firestore';
 import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot } from "@react-native-firebase/firestore";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 import { ReanimatedScrollView } from 'react-native-reanimated'; // If you want scroll-based animations
 import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
@@ -59,6 +60,7 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 export default function ISINChangeAfterCorporateActionSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -79,7 +81,7 @@ export default function ISINChangeAfterCorporateActionSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const ISINChangeAfterCorporateAction_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -132,6 +134,14 @@ export default function ISINChangeAfterCorporateActionSheet () {
 
 
 
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'ISINChangeAfterCorporateAction_Sheet',
+      $screen_name: 'ISINChangeAfterCorporateAction_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 
@@ -674,7 +684,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={ISINChangeAfterCorporateAction_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -809,18 +819,23 @@ this information will only be available a few days later.
 
 
 
-  <View style={{
-    width: "100%",
-    position: 'absolute',
-    bottom: height(5),
-    flexDirection: 'row',
-}}>
+          <View style={{
+            width: "100%",
+            position: 'absolute',
+            bottom: height(8),
+            flexDirection: 'row',
+        }}>
 
 
-<TouchableOpacity onPress={() => {
+        <TouchableOpacity onPress={() => {
           
-      
-      SheetManager.hide("PortfolioGrowthPerformance_Sheet"); // Now hide the sheet after a delay
+          posthog.capture(`close_isn_change_after_corporateAction_bottomsheet`, {
+            screen: 'ISINChangeAfterCorporateAction_Sheet',
+            $screen_name: 'ISINChangeAfterCorporateAction_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+           SheetManager.hide("ISINChangeAfterCorporateAction_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

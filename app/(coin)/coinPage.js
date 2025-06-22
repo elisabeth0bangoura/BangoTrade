@@ -53,6 +53,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StockLineContext } from '../Context/StockLineColor';
 import { ToastMessageContext } from '../Context/ToastMessageContext';
 import { HomeChartContext } from '../Context/HomeChartContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -62,6 +63,7 @@ import { HomeChartContext } from '../Context/HomeChartContext';
 
 const CoinPage =  React.memo((props) => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -180,6 +182,13 @@ const headerStyle = {
 
 
 
+useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'Coin_Page',
+    $screen_name: 'Coin_Page '+" / "+coinData.name,
+    timestamp: new Date().toISOString(),
+  });
+}, []);
 
 
 
@@ -377,6 +386,15 @@ const handleFollowCoin = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
     if (isFollowing) {
+
+      posthog.capture('click_unfollowing_asset', {
+        screen: 'Coin_Page',
+        $screen_name: 'Coin_Page '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+      
+      }); 
+      
+
       // Unfollow the coin (delete it from Firestore)
       await firestore()
         .collection('users')
@@ -387,6 +405,13 @@ const handleFollowCoin = async () => {
 
     //  console.log('Coin unfollowed!');
     } else {
+
+      posthog.capture('click_following_asset', {
+        screen: 'Coin_Page',
+        $screen_name: 'Coin_Page '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+      
+      });
       // Follow the coin (add it to Firestore)
       await firestore()
         .collection('users')
@@ -954,6 +979,14 @@ useEffect(() => {
   const handlePress = () => {
     // Only reset translateY when opening the button
     if (!isOpenTransfer) {
+
+
+    posthog.capture('open_coin_trade_button', {
+      screen: 'Coin_Page',
+      $screen_name: 'Coin_Page '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
+
       translateY.setValue(0); // Reset position when opening
     
       // Opening: Apply animations in sequence with bounce
@@ -980,6 +1013,13 @@ useEffect(() => {
       }, 300); // Adjust this timeout based on your animation timing
     
     } else {
+
+      posthog.capture('close_coin_trade_button', {
+        screen: 'Coin_Page',
+        $screen_name: 'Coin_Page '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+        });
+
       // Closing: Apply animations without bounce
       // Fast floating-up animation (for closing) combined with fade-out
       Animated.spring(translateY, {
@@ -1061,6 +1101,9 @@ useEffect(() => {
       if(SearchIndex == false){
         setShowHomeChart(true)
       }
+
+      setShowTrasnferBtn(false)
+      
       setTimeout(() => {
         console.log("🔥 ActionSheet onClose triggered");
         console.log("PlacedOrder:", PlacedOrder);
@@ -1491,6 +1534,13 @@ style={{
 <TouchableOpacity onPress={() => {
 
 
+posthog.capture('open_coin_price_tracker_bottomsheet', {
+  screen: 'Coin_Price_Tracker_Page',
+  $screen_name: 'Coin_Price_Tracker_Page',
+  timestamp: new Date().toISOString(),
+  });
+
+
   SheetManager.show('PriceTracker_Sheet', {
     payload: {
       coinData,
@@ -1752,6 +1802,14 @@ null
             {/* First Button: Einzahlen */}
             <TouchableOpacity
               onPress={() => {
+
+                posthog.capture('open_coin_sellamount_type_bottomsheet', {
+                  screen: 'CoinPage_Sheet',
+                  $screen_name: 'CoinPage_Sheet '+" / "+coinData.name,
+                  timestamp: new Date().toISOString(),
+                  });
+
+                  setShowTrasnferBtn(false)
                 SheetManager.show("SellAmountType_Sheet")
               }}
               activeOpacity={0.8}
@@ -1793,6 +1851,14 @@ null
             {/* Second Button: Senden */}
             <TouchableOpacity
               onPress={() => {
+
+                posthog.capture('open_coin_money_amount_bottomsheet', {
+                  screen: 'CoinPage_Sheet',
+                  $screen_name: 'CoinPage_Sheet '+" / "+coinData.name,
+                  timestamp: new Date().toISOString(),
+                  });
+
+                  setShowTrasnferBtn(false)
                 SheetManager.show("MoneyAmount_Sheet");
    
               }}

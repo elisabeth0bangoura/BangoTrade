@@ -40,6 +40,8 @@ import { getFirestore, doc, getDoc, collection, setDoc, addDoc, onSnapshot } fro
 import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
+
 
 
 
@@ -93,6 +95,7 @@ const SkeletonPlaceholder = () => {
 
 
 export default function DerivatesData({ SearchIndex }) {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -286,6 +289,13 @@ useEffect(() => {
   return (
    <TouchableOpacity onPress={() => {
 
+
+    posthog.capture('open_stock_bottomsheet', {
+      screen: 'Stock_Page',
+      $screen_name: 'Stock_Page '+" / "+item.name,
+      timestamp: new Date().toISOString(),
+  
+      });
 
 
     const handleItemClick = async (item) => {

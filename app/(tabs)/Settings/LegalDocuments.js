@@ -46,6 +46,7 @@ import { AmountContext } from '../../Context/OpenAmountSheetContext';
 import { CoinPageContext } from '../../Context/OpenCoinPageContext';
 import { SellAmountContext } from '../../Context/SellOpenAmountSheetContext';
 import RNPickerSelect from "react-native-picker-select";
+import { usePostHog } from 'posthog-react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { HomeContext } from '../../Context/HomeContext';
@@ -82,6 +83,10 @@ const documentId = 'b7e0f8af-9e06-4751-b502-a7ac44655e86';  // Example document 
 
 
 export default function LegalDocuments() {
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { t } = useTranslation();
 
@@ -135,6 +140,20 @@ export default function LegalDocuments() {
   
   
    
+
+
+
+
+
+
+   useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'LegalDocuments_Sheet',
+      $screen_name: 'LegalDocuments_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
   
   
 
@@ -359,6 +378,14 @@ export default function LegalDocuments() {
 
 <TouchableOpacity onPress={() => {
 
+posthog.capture('open_settings_general_documents_bottomsheet', {
+  screen: 'LegalDocuments_Sheet',
+  $screen_name: 'LegalDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
+
 SheetManager.show("GeneralDocuments_Sheet")
 }} style={{
   flexDirection: 'row',
@@ -412,6 +439,15 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_settings_inprint_bottomsheet', {
+  screen: 'LegalDocuments_Sheet',
+  $screen_name: 'LegalDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
+
 
 SheetManager.show("Inprint_Sheet")
 }} style={{

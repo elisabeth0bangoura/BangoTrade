@@ -43,6 +43,7 @@ import firestore from '@react-native-firebase/firestore';
 import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot } from "@react-native-firebase/firestore";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 import { ReanimatedScrollView } from 'react-native-reanimated'; // If you want scroll-based animations
 import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
@@ -60,6 +61,8 @@ import { CurrentCoinSelectedContext } from '@/app/Context/CurrentCoinSelectedCon
 
 export default function CryptoSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
 
 	const router = useRouter();
@@ -80,7 +83,7 @@ export default function CryptoSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const AboutCrypto_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -138,6 +141,14 @@ export default function CryptoSheet () {
   
 
 
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Crypto_Sheet',
+      $screen_name: 'Crypto_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
 
 
 
@@ -422,9 +433,6 @@ const categories = [
       { name: 'Order types', 
         linkName: "Cryptotypes_Sheet",
        },
-      { name: 'Pending orders',
-       // linkName: "PortfolioValueDecreased_Sheet",
-       },
       { name: 'Crypto Security',
         linkName: "CryptoSecurity_Sheet",
        },
@@ -564,6 +572,13 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
     return (
       <TouchableOpacity
         onPress={() => {
+
+          posthog.capture('open_coin_bottomsheet', {
+            screen: 'Crypto_Sheet',
+            $screen_name: 'Crypto_Sheet '+" / "+item.name,
+            timestamp: new Date().toISOString(),
+        
+            });
           // Handle item press if needed
           setCoinPageIndex(0);
           SheetManager.show('CoinPage_Sheet');
@@ -653,7 +668,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={AboutCrypto_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -715,7 +730,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
               marginLeft: width(5),
           }}>
 
-            Portfolio Growth and Performance
+            Crypto
              
           </Text>
   
@@ -845,15 +860,21 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   <View style={{
 width: "100%",
 position: 'absolute',
-  bottom: height(5),
+  bottom: height(8),
    flexDirection: 'row',
 }}>
 
 
-<TouchableOpacity onPress={() => {
+      <TouchableOpacity onPress={() => {
           
+          posthog.capture('close_crypto_Sheet', {
+            screen: 'Crypto_Sheet',
+            $screen_name: 'Crypto_Sheet',
+            timestamp: new Date().toISOString(),
+          });
       
-      SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
+      
+      SheetManager.hide("AboutCrypto_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

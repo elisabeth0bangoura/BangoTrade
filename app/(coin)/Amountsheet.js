@@ -45,6 +45,7 @@ import ActionSheet, {useSheetRef, FlatList, ScrollView, SheetManager} from 'reac
 import { ViewModeContext } from '../Context/ViewModeContext';
 import { t } from 'i18next';
 import { ToastMessageContext } from '../Context/ToastMessageContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -91,6 +92,8 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 
 
 export const BuyAmountTypeSheetPage = () => {
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t } = useTranslation();
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -413,6 +416,9 @@ export const BuyAmountTypeSheetPage = () => {
 
 const Amountsheet =  React.memo(({ AssetSupply}) => {
   
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
   const { t } = useTranslation();
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -499,7 +505,15 @@ const Amountsheet =  React.memo(({ AssetSupply}) => {
 
 
 
-
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'MoneyAmount_Sheet',
+        $screen_name: 'MoneyAmount_Sheet '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+    
+    
    
 
 
@@ -959,6 +973,13 @@ return(
 
   onClose={() => {
 
+
+    posthog.capture('closed_sheet', {
+      screen: 'MoneyAmount_Sheet',
+      $screen_name: 'MoneyAmount_Sheet '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
+
     setValue("0")
     setRawValue("0")
     setValueShares("0")
@@ -1130,9 +1151,42 @@ return(
 
 
 
-        <View style={{
-          marginTop: height(15)
+<View style={{
+               position: 'absolute',
+               bottom: height(-8),
+               flexDirection: 'row'
         }}>
+
+    <TouchableOpacity onPress={() => {
+
+    posthog.capture('canceled_coinmoneyamount_Sheet', {
+      screen: 'MoneyAmount_Sheet',
+      $screen_name: 'MoneyAmount_Sheet '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
+
+    SheetManager.hide("MoneyAmount_Sheet")
+    }}
+        style={{
+            height: size(55),
+            width: size(55),
+            marginLeft: width(5),
+            backgroundColor: CurrentViewMode.Mode_ButtonColor_Profile,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 10,
+        }}>
+            <MaterialIcons name="arrow-back-ios" style={{
+                fontSize: size(18),
+                color: CurrentViewMode.Mode_fontColor,
+
+            }} />
+        </TouchableOpacity>
+
+
+
+
+
 
     
            {/* Submit Button */}
@@ -1142,22 +1196,28 @@ return(
              
               if(AbleToBuy == false) {
                 null
-            } else {
+                } else {
+
+              posthog.capture('open_coin_buy_confirmation_bottomsheet', {
+                screen: 'MoneyAmount_Sheet',
+                $screen_name: 'MoneyAmount_Sheet '+" / "+coinData.name,
+                timestamp: new Date().toISOString(),
+                });
+
+
               SheetManager.show("BuyConfirmation_Sheet");
             }
    
             }}
             disabled={value == 0 || AbleToBuy == false ? true : false}
             style={{
-              marginTop: 20,
               height: 50,
               backgroundColor:  CurrentViewMode.Mode_fontColor,
               borderRadius: 10,
               position: 'absolute',
-              bottom: height(6),
               width: width(35),
               paddingHorizontal: 30,
-              right: width(7),
+              left: width(60),
               opacity: value == 0 || AbleToBuy == false  ? 0.3 :  100,
               flexDirection: 'row',
               alignItems: 'center',

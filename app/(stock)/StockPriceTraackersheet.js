@@ -45,6 +45,7 @@ import { t } from 'i18next';
 import { IFollowingsCoinsContext } from '../Context/OpenIFollowingsCoinsSheetContext';
 import { SearchContext } from '../Context/MainSearchIndexStateContext';
 import { BuyConfirmationSheetContext } from '../Context/BuyConfirmationSheetContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -67,6 +68,7 @@ import { BuyConfirmationSheetContext } from '../Context/BuyConfirmationSheetCont
 
 
 const StockPriceTraackersheet =  React.memo(({ sheetId, payload }) => {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -142,6 +144,38 @@ const StockPriceTraackersheet =  React.memo(({ sheetId, payload }) => {
     const windowHeight = Dimensions.get('window').height;
     const snapPointsPriceTracker = useMemo(() => [windowHeight * 0.91], []);
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'Stock_Price_Tracker_Page',
+        $screen_name: 'Stock_Price_Tracker_Page '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+    
+
+
+
+
+
+
+
+
+
+
+
 
 
     const handleOpenPriceTracker = useCallback(() => {
@@ -663,6 +697,13 @@ style={{
 
   <TouchableOpacity onPress={() => {
 
+
+
+      posthog.capture('close_stock_price_tracker_bottomsheet', {
+        screen: 'Stock_Price_Tracker_Page',
+        $screen_name: 'Stock_Price_Tracker_Page',
+        timestamp: new Date().toISOString(),
+        });
 
 
 

@@ -37,6 +37,7 @@ import { HomeContext } from '../../../../../Context/HomeContext';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { ViewModeContext } from '../../../../../Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 import firestore from '@react-native-firebase/firestore';
 
@@ -58,6 +59,7 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 export default function DifferenceComparedToIndividualItemsSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -78,7 +80,7 @@ export default function DifferenceComparedToIndividualItemsSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const DifferenceComparedToIndividualItems_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -673,7 +675,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={DifferenceComparedToIndividualItems_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -805,15 +807,21 @@ This includes gains and losses from investments that are no longer part of your 
   <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
 
 <TouchableOpacity onPress={() => {
           
-      
-      SheetManager.hide("PortfolioGrowthPerformance_Sheet"); // Now hide the sheet after a delay
+          DifferenceComparedToIndividualItems_Sheet
+          posthog.capture('close_difference_compared_to_individual_items_Sheet', {
+            screen: 'DifferenceComparedToIndividualItems_Sheet',
+            $screen_name: 'DifferenceComparedToIndividualItems_Sheet',
+            timestamp: new Date().toISOString(),
+            });
+  
+      SheetManager.hide("DifferenceComparedToIndividualItems_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

@@ -56,6 +56,7 @@ import { ViewModeContext } from '@/app/Context/ViewModeContext';
 
 import firestore from '@react-native-firebase/firestore';
 
+import { usePostHog } from 'posthog-react-native';
 
 import { getFirestore, getDoc, addDoc, collection, doc, onSnapshot } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
@@ -75,6 +76,9 @@ const documentId = 'b7e0f8af-9e06-4751-b502-a7ac44655e86';  // Example document 
 
 
 export default function ChnageEmailAddress ()  {
+  
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
 
   const router = useRouter();
@@ -127,6 +131,22 @@ export default function ChnageEmailAddress ()  {
 
      
      
+
+
+
+
+
+
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'ChnageEmailAddress_Sheet',
+        $screen_name: 'ChnageEmailAddress_Sheet',
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+     
+
+
 
 
  
@@ -355,6 +375,14 @@ flexDirection: 'row',
 
 }}>
           <TouchableOpacity onPress={() => {
+
+            posthog.capture('close_change_email_addrees_bottomsheet', {
+              screen: 'ChnageEmailAddress_Sheet',
+              $screen_name: 'ChnageEmailAddress_Sheet',
+              timestamp: new Date().toISOString(),
+
+              });
+
              Keyboard.dismiss(); // Dismiss the keyboard first
              setTimeout(() => {
                SheetManager.hide("ChnageEmailAddress_Sheet"); // Now hide the sheet after a delay
@@ -412,6 +440,13 @@ flexDirection: 'row',
 
                     console.log(res)
                     setshowChangedEmail(true)
+
+                    posthog.capture('clicked_saved_new_email_address_button', {
+                      screen: 'ChnageEmailAddress_Sheet',
+                      $screen_name: 'ChnageEmailAddress_Sheet',
+                      timestamp: new Date().toISOString(),
+      
+                      });
 
                    // setPhonenumber("")
                     SheetManager.hide("ChnageEmailAddress_Sheet")

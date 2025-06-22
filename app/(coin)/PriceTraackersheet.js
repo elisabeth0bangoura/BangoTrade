@@ -42,6 +42,7 @@ import { getFirestore, doc, getDoc, collection, addDoc, setDoc } from '@react-na
 import { getAuth, signOut, signInWithEmailAndPassword, onAuthStateChanged } from "@react-native-firebase/auth";
 import { ToastMessageContext } from '../Context/ToastMessageContext';
 import { t } from 'i18next';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -57,6 +58,7 @@ import { t } from 'i18next';
 
  export const OrderTypeSheetPage = () => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -76,6 +78,34 @@ import { t } from 'i18next';
     setRawValuShares,
   
   } = useContext(PriceTrackerContext);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Coin_Price_Tracker_Page',
+      $screen_name: 'Coin_Price_Tracker_Page '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
+
+
+
+
 
 
 
@@ -936,6 +966,15 @@ style={{
  <TouchableOpacity onPress={() => {
 
 setPlacedTracker(true)
+
+
+
+posthog.capture('close_coin_price_tracker_bottomsheet', {
+  screen: 'Coin_Price_Tracker_Page',
+  $screen_name: 'Coin_Price_Tracker_Page',
+  timestamp: new Date().toISOString(),
+  });
+
 
         const SavePriceTracker = async () => {
           try {

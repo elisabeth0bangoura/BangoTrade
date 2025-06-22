@@ -34,6 +34,7 @@ import { CoinPageContext } from '@/app/Context/OpenCoinPageContext';
 import { CurrentCoinSelectedContext } from '@/app/Context/CurrentCoinSelectedContext';
 import { SheetManager } from 'react-native-actions-sheet';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -85,6 +86,8 @@ const SkeletonPlaceholder = () => {
 
 
 export default function GovernanceData({ SearchIndex }) {
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -226,6 +229,14 @@ export default function GovernanceData({ SearchIndex }) {
 
   return (
   <TouchableOpacity onPress={() => {
+
+    posthog.capture('open_coin_bottomsheet', {
+      screen: 'Coin_Page',
+      $screen_name: 'Coin_Page '+" / "+item.name,
+      timestamp: new Date().toISOString(),
+  
+      });
+
     setCoinPageIndex(0)
     SheetManager.show('CoinPage_Sheet',  {
       payload: { value: item.symbol }, // Passing dynamic data (payload)

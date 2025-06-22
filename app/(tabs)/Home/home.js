@@ -1,4 +1,5 @@
 import React, { useState, useRef, useContext, useEffect, useMemo, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 
 import { View, Text,Animated,  LayoutAnimation,
   StyleSheet,
@@ -37,6 +38,8 @@ import RollingNumber from './animatedNumber';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
 
 
+import { getAnalytics, setUserId, logEvent, setUserProperties } from '@react-native-firebase/analytics';
+
 
 
 import firestore from '@react-native-firebase/firestore';
@@ -45,6 +48,8 @@ import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot } from "@reac
 import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { SearchContext } from '@/app/Context/MainSearchIndexStateContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -501,6 +506,13 @@ const calculatedHeight = windowHeight * 0.40;
 
 
 const Home = () => {
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
+const analytics = getAnalytics(); // ✅ nicht analytics()
+
   
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
 
@@ -550,7 +562,8 @@ const Home = () => {
     dollarChangeColor, setDollarChangeColor,
   } = useContext(HomeChartContext);
 
-  
+  const { SearchIndex, setSearchIndex, SearchLoading, setSearchLoading } = useContext(SearchContext);
+
   const {IFollowingsCoinsIndex, setIFollowingsCoinsIndex } = useContext(IFollowingsCoinsContext);
 
   const [ChangeGrowthChangePortfolio, setChangeGrowthChangePortfolio] = useState(!true)
@@ -568,7 +581,6 @@ const Home = () => {
 
     
     
-
 
   
 
@@ -639,7 +651,24 @@ const Home = () => {
 
 
 
+
+
+  useFocusEffect(
+    useCallback(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'Home',
+        timestamp: new Date().toISOString(),
+      });
+    }, [posthog])
+  );
+
+
+
+
   useEffect(() => {
+
+
+    
     setLoaded(true);
 
 
@@ -649,16 +678,32 @@ const Home = () => {
 
     const fetchUserData = async () => {
       try {
+
         const user = getAuth().currentUser;
         if (user) {
           const userDocument = await firestore()
             .collection('users')
             .doc(user.uid)
             .get();
+
+
     
           if (userDocument.exists) {
             setAlpacaUserId(userDocument.data().AlpacaAccountId);
     
+
+
+const analytics = getAnalytics();
+await setUserId(analytics, user.uid);
+await setUserProperties(analytics, {
+  email: userDocument.data().Email,
+}).then((res) => {
+
+  console.log("Analytics ", res)
+})
+
+
+
             firestore()
               .collection('users')
               .doc(user.uid)
@@ -1390,9 +1435,15 @@ const getQuantity = (qty) => {
     return (
       <TouchableOpacity
         onPress={() => {
+
         
-
-
+          posthog.capture('open_stock_bottomsheet', {
+            screen: 'Home',
+            $screen_name: 'Home '+" / "+item.name,
+            timestamp: new Date().toISOString(),
+        
+            });
+        
          setCoinPageIndex(0)
           SheetManager.show('StockPage_Sheet',  {
             payload: { value: item.symbol }, // Passing dynamic data (payload)
@@ -1585,6 +1636,15 @@ color: CurrentViewMode.Mode_bg,
       return (
         <TouchableOpacity
           onPress={() => {
+
+            posthog.capture('open_coin_bottomsheet', {
+              screen: 'Home',
+              $screen_name: 'Home '+" / "+item.name,
+              timestamp: new Date().toISOString(),
+          
+              });
+        
+              
             // Handle item press if needed
             setCoinPageIndex(0);
             SheetManager.show('CoinPage_Sheet',  {
@@ -1662,8 +1722,13 @@ color: CurrentViewMode.Mode_bg,
 
       console.log(item)
 
-   /* if(item.type == "stock") {
-
+    if(item.type == "stock") {
+      posthog.capture('open_stock_bottomsheet', {
+        screen: 'Home',
+        $screen_name: 'Home '+" / "+item.name,
+        timestamp: new Date().toISOString(),
+    
+        });
       setCoinPageIndex(0)
       SheetManager.show('StockPage_Sheet',  {
         payload: { value: item.symbol }, // Passing dynamic data (payload)
@@ -1704,7 +1769,12 @@ color: CurrentViewMode.Mode_bg,
 
      
     } else if(item.type == "crypto") {
-  
+      posthog.capture('open_coin_bottomsheet', {
+        screen: 'Home',
+        $screen_name: 'Home '+" / "+item.name,
+        timestamp: new Date().toISOString(),
+    
+        });
       setCoinPageIndex(0);
       SheetManager.show('CoinPage_Sheet',  {
         payload: { value: item.symbol }, // Passing dynamic data (payload)
@@ -1720,7 +1790,7 @@ color: CurrentViewMode.Mode_bg,
       });
       
     } 
-*/
+
 
     }}
     style={{ 
@@ -1897,7 +1967,7 @@ color: CurrentViewMode.Mode_bg,
 
 
           {
-            ShowHomeChart == true
+             SearchIndex == -1 
             ?
 
 
@@ -2071,7 +2141,7 @@ color: CurrentViewMode.Mode_bg,
           }}> 
 
         {
-          ShowHomeChart 
+          SearchIndex == -1 
 
           ?
           <HomeChart />
@@ -2118,6 +2188,13 @@ color: CurrentViewMode.Mode_bg,
 
 
           <TouchableOpacity onPress={() => {
+
+            posthog.capture('open_sort_metrics_since_buy_bottomsheet', {
+              screen: 'Home',
+              $screen_name: 'Home',
+              timestamp: new Date().toISOString(),
+              
+            });
             SheetManager.show("SortMetricsSinceBuy_Sheet")
           }} style={{
             flexDirection: 'row',
@@ -2176,6 +2253,12 @@ color: CurrentViewMode.Mode_bg,
 
 
           <TouchableOpacity onPress={() => {
+            posthog.capture('open_sort_metrics_since_buy_bottomsheet', {
+              screen: 'Home',
+              $screen_name: 'Home',
+              timestamp: new Date().toISOString(),
+              
+            });
             SheetManager.show("SortMetricsSinceBuy_Sheet")
           }} style={{
             flexDirection: 'row',
@@ -2241,6 +2324,13 @@ color: CurrentViewMode.Mode_bg,
 
 
           <TouchableOpacity onPress={() => {
+
+            posthog.capture('open_sort_metrics_since_buy_bottomsheet', {
+              screen: 'Home',
+              $screen_name: 'Home',
+              timestamp: new Date().toISOString(),
+              
+            });
             SheetManager.show("SortMetricsSinceBuy_Sheet")
           }} style={{
             flexDirection: 'row',
@@ -2305,6 +2395,13 @@ color: CurrentViewMode.Mode_bg,
 
 
           <TouchableOpacity onPress={() => {
+
+            posthog.capture('open_sort_metrics_since_buy_bottomsheet', {
+              screen: 'Home',
+              $screen_name: 'Home',
+              timestamp: new Date().toISOString(),
+              
+            });
             SheetManager.show("SortMetricsSinceBuy_Sheet")
           }} style={{
             flexDirection: 'row',
@@ -2452,6 +2549,14 @@ color: CurrentViewMode.Mode_bg,
         }}>
 
           <TouchableOpacity onPress={() => {
+
+          posthog.capture('open_analytics_bottomsheet', {
+            screen: 'Home',
+            $screen_name: 'Home',
+            timestamp: new Date().toISOString(),
+            
+          });
+
             SheetManager.show("Analytics_Sheet")
           }}
           style={{
@@ -2489,6 +2594,13 @@ color: CurrentViewMode.Mode_bg,
 
 
           <TouchableOpacity onPress={() => {
+
+            posthog.capture('open_orders_history_bottomsheet', {
+              screen: 'Home',
+              $screen_name: 'Home',
+              timestamp: new Date().toISOString(),
+              
+            });
             SheetManager.show("OrdersHistory_Sheet")
           }}
           style={{
@@ -2529,6 +2641,13 @@ color: CurrentViewMode.Mode_bg,
 
        
           <TouchableOpacity onPress={() => {
+              posthog.capture('open_sell_history_bottomsheet', {
+                screen: 'Home',
+                $screen_name: 'Home',
+                timestamp: new Date().toISOString(),
+                
+              });
+            
             SheetManager.show("SellHistory_Sheet")
           }}
           style={{
@@ -2605,6 +2724,13 @@ color: CurrentViewMode.Mode_bg,
 
          
             <TouchableOpacity onPress={() => {
+
+                  posthog.capture('open_coins_i_follow_bottomsheet', {
+                    screen: 'Home',
+                    $screen_name: 'Home',
+                    timestamp: new Date().toISOString(),
+                    
+                  });
                  SheetManager.show('CoinSIFollow_Sheet');
             }}
             style={{ 

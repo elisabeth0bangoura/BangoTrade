@@ -49,6 +49,8 @@ import { getFirestore, getDoc, addDoc, collection, doc, onSnapshot } from "@reac
 import { useRouter } from "expo-router";
 import { getAuth, signOut, signInWithEmailAndPassword, onAuthStateChanged } from "@react-native-firebase/auth";
 
+import { usePostHog } from 'posthog-react-native';
+
 
 
 
@@ -62,6 +64,8 @@ import { getAuth, signOut, signInWithEmailAndPassword, onAuthStateChanged } from
 
 export default function ManagePersonalInformationSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
 
   const router = useRouter();
@@ -79,7 +83,7 @@ export default function ManagePersonalInformationSheet () {
 
   const {MetricsState, setMetricsState} = useContext(HomeChartContext)
   const windowHeight = Dimensions.get('window').height;
-  const AccountDetails_Sheet = useRef(null);
+  const ManagePersonalInformation_Sheet = useRef(null);
   const calculatedHeight = windowHeight * 0.92;
   const [Depot_number, setDepot_number] = useState("")
   const [AccountID, setAccountID] = useState("")
@@ -106,6 +110,17 @@ const [PlaceOfBirth, setPlaceOfBirth] = useState("")
       authorization: 'Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA=='
     }
   };
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'ManagePersonalInformation_Sheet',
+      $screen_name: 'ManagePersonalInformation_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
 
 
 
@@ -183,7 +198,7 @@ const [PlaceOfBirth, setPlaceOfBirth] = useState("")
   
   
         <ActionSheet 
-        ref={AccountDetails_Sheet}
+        ref={ManagePersonalInformation_Sheet}
         backgroundInteractionEnabled={false}
         isModal={false}
         onOpen={() => {

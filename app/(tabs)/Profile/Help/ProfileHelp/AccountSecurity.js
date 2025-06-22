@@ -47,6 +47,8 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 import { ReanimatedScrollView } from 'react-native-reanimated'; // If you want scroll-based animations
 import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
 import SkeletonLoading from 'expo-skeleton-loading'
+import { usePostHog } from 'posthog-react-native';
+
 
 
 
@@ -59,6 +61,7 @@ import SkeletonLoading from 'expo-skeleton-loading'
 export default function AccountSecuritySheet () {
   
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 	const router = useRouter();
 	const auth = getAuth();
@@ -78,7 +81,7 @@ export default function AccountSecuritySheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const AccountSecurity_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -130,6 +133,16 @@ export default function AccountSecuritySheet () {
   
 
 
+  
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'AccountSecurity_Sheet',
+      $screen_name: 'AccountSecurity_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 
@@ -673,7 +686,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={AccountSecurity_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -876,16 +889,20 @@ We're here to support you every step of the way. Your safety is our top priority
   <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
 
 
       <TouchableOpacity onPress={() => {
-          
-      
-      SheetManager.hide("PortfolioGrowthPerformance_Sheet"); // Now hide the sheet after a delay
+
+          posthog.capture('close_account_security_Sheet', {
+            screen: 'AccountSecurity_Sheet',
+            $screen_name: 'AccountSecurity_Sheet',
+            timestamp: new Date().toISOString(),
+          });
+      SheetManager.hide("AccountSecurity_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

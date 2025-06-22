@@ -1,7 +1,10 @@
 
+
 import React, { useCallback, useContext, useState, useMemo, useRef, useEffect } from 'react';
 import { View, Text, Button, UIManager, AppState, Animated, AppStateStatus, Easing, Image, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { height, size, width } from 'react-native-responsive-sizes';
+import { Slot, useNavigationContainerRef } from 'expo-router';
+
 import { LinearGradient } from 'expo-linear-gradient';
 import LottieView from 'lottie-react-native';
 import BottomSheet, { BottomSheetScrollView, BottomSheetBackdrop, BottomSheetModalProvider } from "@gorhom/bottom-sheet";
@@ -17,7 +20,7 @@ import { Stack } from 'expo-router';
 import { LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
-import { getAuth, signOut } from "@react-native-firebase/auth";
+import { getAuth, onAuthStateChanged, signOut } from "@react-native-firebase/auth";
 import * as SecureStore from "expo-secure-store";
 import * as LocalAuthentication from "expo-local-authentication";
 
@@ -75,6 +78,17 @@ import { OptionsListContextProvider } from './Context/OptionsListContext';
 
 import { getDatabase, update, ref, get, onValue  } from "@react-native-firebase/database";
 import i18n from '@/Languages_Translation_Screens/i18n';
+import { usePostHog, PostHogProvider } from 'posthog-react-native'
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -107,6 +121,10 @@ export default function RootLayout() {
 <Button title="📩 Send Local Notification" onPress={sendRemotePush} />
  */ }
       <GestureHandlerRootView> 
+      <PostHogProvider apiKey="phc_4rn7v708jhc4mni0CywYBc0sCEAqyeyTVnEflz48Llc" options={{
+            host: "https://us.i.posthog.com",
+            
+        }}>
       <ToastMessageContextProvider>
       <OptionsListContextProvider>
         <IndiceListContextProvider> 
@@ -157,6 +175,7 @@ export default function RootLayout() {
       </IndiceListContextProvider>
       </OptionsListContextProvider>
       </ToastMessageContextProvider>
+      </PostHogProvider>
       </GestureHandlerRootView>
     </>
   );
@@ -168,6 +187,7 @@ export default function RootLayout() {
 
 function RootApp() {
 
+  
   if (
     Platform.OS === 'android' &&
     UIManager.setLayoutAnimationEnabledExperimental
@@ -206,6 +226,7 @@ function RootApp() {
 
 
 
+  
 
 
 
@@ -226,7 +247,11 @@ interface ChartData {
  
    
 
- 
+const navigationRef = useNavigationContainerRef();
+const routeNameRef = useRef<string | undefined>();
+
+
+
   const router = useRouter();
   const auth = getAuth();
  
@@ -283,6 +308,10 @@ Notifications.setNotificationHandler({
 const [expoPushToken, setExpoPushToken] = useState<string>('');
 const notificationListener = useRef<Notifications.Subscription | null>(null);
 const responseListener = useRef<Notifications.Subscription | null>(null);
+
+
+
+
 
 
 
@@ -1045,32 +1074,35 @@ const NoMoneyToWidthraw = ({
 
 
 
+
+
   return (
     <>
 
     
 
-{showSplash && (
-      <View style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          zIndex: 9999,
-          justifyContent: "center",
-          alignItems: "center",
-      }}>
-        <BlurView intensity={100} style={{
-           position: "absolute",
-           width: "100%",
-           height: "100%",
-        }} tint="dark" />
-        <Image source={require("../assets/images/icon.png")} style={{
-           width: 120,
-           height: 120,
-           resizeMode: "contain",
-        }} />
-      </View>
-    )}
+{showSplash ? (
+  <View style={{
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    zIndex: 9999,
+    justifyContent: "center",
+    alignItems: "center",
+  }}>
+    <BlurView intensity={100} style={{
+      position: "absolute",
+      width: "100%",
+      height: "100%",
+    }} tint="dark" />
+    <Image source={require("../assets/images/icon.png")} style={{
+      width: 120,
+      height: 120,
+      resizeMode: "contain",
+    }} />
+  </View>
+) : null}
+
 
      
   {/* ✅ Toast Message - Always Visible on Top */}

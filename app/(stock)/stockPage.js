@@ -56,6 +56,7 @@ import RollingNumberStocks from './animatedNumber';
 import { HomeChartContext } from '../Context/HomeChartContext';
 import { ToastMessageContext } from '../Context/ToastMessageContext';
 import { DateTime } from 'luxon';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -65,6 +66,7 @@ import { DateTime } from 'luxon';
 
 const StockPage = React.memo((props) => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -188,6 +190,14 @@ const headerStyle = {
 
 
 
+
+useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'Stock_Page',
+    $screen_name: 'Stock_Page '+" / "+coinData.name,
+    timestamp: new Date().toISOString(),
+  });
+}, []);
 
 
 
@@ -436,10 +446,23 @@ const fetchDominantColor = async (imageUri) => {
 
 
 const handleFollowCoin = async () => {
+
+
+  console.log(props.payload?.category)
+
+
+  
   try {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
     if (isFollowing) {
+
+      posthog.capture('click_unfollowing_asset', {
+        screen: 'Stock_Page',
+        $screen_name: 'Stock_Page '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+      
+      }); 
       // Unfollow the coin (delete it from Firestore)
       await firestore()
         .collection('users')
@@ -451,6 +474,14 @@ const handleFollowCoin = async () => {
     //  console.log('Coin unfollowed!');
     } else {
       // Follow the coin (add it to Firestore)
+
+      posthog.capture('click_following_asset', {
+        screen: 'Stock_Page',
+        $screen_name: 'Stock_Page '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+      
+      });
+
       await firestore()
         .collection('users')
         .doc(currentUser.uid)
@@ -458,7 +489,7 @@ const handleFollowCoin = async () => {
         .doc(coinData.id)
         .set({
           ...coinData,
-          category:  item.category == "derivatives" 
+          category: props.payload?.category == "derivatives" 
          ? "derivatives"
          : props.payload?.category === "ETF"
             ? "ETFs"
@@ -474,7 +505,7 @@ const handleFollowCoin = async () => {
     setIsFollowing(!isFollowing);  // Toggle the state
   } catch (error) {
     console.error('Error updating follow status:', error);
-  }
+  } 
 };
 
 
@@ -1139,8 +1170,20 @@ useEffect(() => {
 
 
   const handlePress = () => {
+
+
+
     // Only reset translateY when opening the button
     if (!isOpenTransfer) {
+
+
+    posthog.capture('open_stock_trade_button', {
+      screen: 'Stock_Page',
+      $screen_name: 'Stock_Page '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
+
+
       translateY.setValue(0); // Reset position when opening
     
       // Opening: Apply animations in sequence with bounce
@@ -1167,6 +1210,15 @@ useEffect(() => {
       }, 300); // Adjust this timeout based on your animation timing
     
     } else {
+
+
+
+    posthog.capture('close_stock_trade_button', {
+      screen: 'Stock_Page',
+      $screen_name: 'Stock_Page '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
+
       // Closing: Apply animations without bounce
       // Fast floating-up animation (for closing) combined with fade-out
       Animated.spring(translateY, {
@@ -1282,7 +1334,6 @@ useEffect(() => {
   return (
 
 
-
  
 <ActionSheet id="StockPage_Sheet"
   ref={StockPage_Sheet}
@@ -1298,10 +1349,19 @@ useEffect(() => {
   
   }}   // Updates state when the sheet opens
   onClose={() => {
+
+    posthog.capture('closed_sheet', {
+      screen: 'Stock_Page',
+      $screen_name: 'Stock_Page '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
+      
     if(SearchIndex == false){
       setShowHomeChart(true)
     }
   
+
+    setShowTrasnferBtn(false)
     setTimeout(() => {
       console.log("🔥 ActionSheet onClose triggered");
       console.log("PlacedOrder:", PlacedOrder);
@@ -1560,6 +1620,7 @@ style={{
 
 
   <TouchableOpacity onPress={() => {
+
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
     handleFollowCoin(coinData)
 
@@ -1930,6 +1991,13 @@ style={{
 <TouchableOpacity onPress={() => {
 
 
+posthog.capture('open_stock_price_tracker_bottomsheet', {
+  screen: 'Stock_Price_Tracker_Page',
+  $screen_name: 'Stock_Price_Tracker_Page',
+  timestamp: new Date().toISOString(),
+  });
+
+
   SheetManager.show('StockPriceTracker_Sheet', {
     payload: {
       coinData,
@@ -2172,7 +2240,17 @@ style={{
             >
               {/* Sell Button */}
               <TouchableOpacity
-                onPress={() => SheetManager.show("Stock_SellAmountType_Sheet")}
+                onPress={() => {
+
+                  posthog.capture('open_stock_sellamount_type_bottomsheet', {
+                    screen: 'StockPage_Sheet',
+                    $screen_name: 'StockPage_Sheet '+" / "+coinData.name,
+                    timestamp: new Date().toISOString(),
+                    });
+                 
+                    setShowTrasnferBtn(false)
+                  SheetManager.show("Stock_SellAmountType_Sheet")
+                }}
                 activeOpacity={0.8}
                 style={{
                   height: size(55),
@@ -2211,7 +2289,17 @@ style={{
 
               {/* Buy Button */}
               <TouchableOpacity
-                onPress={() => SheetManager.show("StockMoneyAmount_Sheet")}
+                onPress={() => {
+
+                posthog.capture('open_stock_money_amount_bottomsheet', {
+                  screen: 'StockPage_Sheet',
+                  $screen_name: 'StockPage_Sheet '+" / "+coinData.name,
+                  timestamp: new Date().toISOString(),
+                  });
+                  
+                  setShowTrasnferBtn(false)
+                  SheetManager.show("StockMoneyAmount_Sheet")
+                }}
                 activeOpacity={0.8}
                 style={{
                   height: size(55),

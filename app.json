@@ -3,9 +3,7 @@
     "name": "bantico",
     "slug": "bantico",
     "version": "1.0.0",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -13,7 +11,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -31,6 +28,12 @@
       "versionCode": 1,
       "googleServicesFile": "./google-services.json",
       "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.USE_BIOMETRIC",
@@ -103,6 +106,9 @@
       "eas": {
         "projectId": "f2264510-0c2d-4357-88b5-be70f092c9f7"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f2264510-0c2d-4357-88b5-be70f092c9f7"
     }
   }
 }

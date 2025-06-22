@@ -50,6 +50,7 @@ import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot  } from "@rea
 import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -230,6 +231,7 @@ const styles = StyleSheet.create({
 export default function StatementsDatePickerCrypto () {
 
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const router = useRouter();
 	const auth = getAuth();
@@ -360,6 +362,13 @@ export default function StatementsDatePickerCrypto () {
 
 
 
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'StatementsDatePickerCrypto_Sheet',
+        $screen_name: 'StatementsDatePickerCrypto_Sheet',
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
 
 
 
@@ -634,6 +643,14 @@ export default function StatementsDatePickerCrypto () {
                     const { uri } = await FileSystem.downloadAsync(downloadData.url, fileUri);
   
                     console.log("Downloaded to:", uri);
+
+         
+                    posthog.capture('clicked_statements_date_picker_crypto_asset', {
+                      screen: 'StatementsDatePickerAccount_Sheet',
+                      $screen_name: 'StatementsDatePickerAccount_Sheet',
+                      timestamp: new Date().toISOString(),
+                      });
+
   
                     // ✅ Step 5: Open PDF using the share menu
                     if (await Sharing.isAvailableAsync()) {

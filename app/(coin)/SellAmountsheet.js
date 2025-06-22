@@ -44,6 +44,7 @@ import ActionSheet, {useSheetRef, FlatList, ScrollView, SheetManager} from 'reac
 
 import { ToastMessageContext } from '../Context/ToastMessageContext';
 import { ViewModeContext } from '../Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 import firestore from '@react-native-firebase/firestore';
@@ -83,6 +84,8 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 
 
 export const SellAmountTypeSheetPage = () => {
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
     const { t } = useTranslation();
@@ -134,7 +137,14 @@ export const SellAmountTypeSheetPage = () => {
 
 
 
-
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'SellAmountType_Sheet',
+        $screen_name: 'SellAmountType_Sheet '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+    
 
 
 
@@ -226,7 +236,7 @@ const formatCurrency = (value) => {
     //backgroundInteractionEnabled={false}
     isModal={false}
     gestureEnabled={true}
- 
+
      CustomHeaderComponent={
    <> 
    
@@ -312,6 +322,13 @@ const formatCurrency = (value) => {
            }}>
 
            <TouchableOpacity onPress={() => {
+
+          posthog.capture('clicked_shares_sellamount_25%_button', {
+            screen: 'SellAmountType_Sheet',
+            $screen_name: 'SellAmountType_Sheet '+" / "+coinData.name,
+            timestamp: new Date().toISOString(),
+            });
+
             setSharesSellAmount("25")
            }}
            style={{
@@ -336,6 +353,15 @@ const formatCurrency = (value) => {
 
 
            <TouchableOpacity onPress={() => {
+
+
+          posthog.capture('clicked_shares_sellamount_50%_button', {
+            screen: 'SellAmountType_Sheet',
+            $screen_name: 'SellAmountType_Sheet '+" / "+coinData.name,
+            timestamp: new Date().toISOString(),
+            });
+
+
             setSharesSellAmount("50")
            }}
            style={{
@@ -374,6 +400,13 @@ const formatCurrency = (value) => {
            }}>
 
            <TouchableOpacity onPress={() => {
+
+            posthog.capture('clicked_shares_sellamount_100%_button', {
+              screen: 'SellAmountType_Sheet',
+              $screen_name: 'SellAmountType_Sheet '+" / "+coinData.name,
+              timestamp: new Date().toISOString(),
+              });
+
             setSharesSellAmount("100")
            }}
            style={{
@@ -400,6 +433,13 @@ const formatCurrency = (value) => {
 
            <TouchableOpacity onPress={() => {
           
+
+
+          posthog.capture('open_coin_sellamount_ordertype_bottomsheet', {
+            screen: 'SellAmountType_Sheet',
+            $screen_name: 'SellAmountType_Sheet '+" / "+coinData.name,
+            timestamp: new Date().toISOString(),
+            });
             
             SheetManager.show("SellOrderType_Sheet");
            }}
@@ -429,6 +469,13 @@ const formatCurrency = (value) => {
 
      
         <TouchableOpacity onPress={() => {
+
+        posthog.capture('open_coin_sellamount_ordertype_bottomsheet', {
+          screen: 'SellAmountType_Sheet',
+          $screen_name: 'SellAmountType_Sheet '+" / "+coinData.name,
+          timestamp: new Date().toISOString(),
+          });
+
           SheetManager.show("SellOrderTypeSheet_Sheet");
         }}
 
@@ -475,6 +522,14 @@ const formatCurrency = (value) => {
 
     
             <TouchableOpacity onPress={() => {
+
+
+              posthog.capture('open_coin_sell_confirmation_bottomsheet', {
+                screen: 'SellAmountType_Sheet',
+                $screen_name: 'SellAmountType_Sheet '+" / "+coinData.name,
+                timestamp: new Date().toISOString(),
+                });
+
                 // Show the Sell Confirmation Shares Sheet
                 SheetManager.show('SellConfirmationShares_Sheet');
 
@@ -562,6 +617,8 @@ const formatCurrency = (value) => {
 
 const SellAmountsheet =  React.memo(({ AssetSupply}) => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { t } = useTranslation();
 
@@ -639,6 +696,16 @@ const SellAmountsheet =  React.memo(({ AssetSupply}) => {
 
 
 
+
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'SellAmounts_Sheet',
+        $screen_name: 'SellAmounts_Sheet '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+    
+    
 
 
 
@@ -1109,6 +1176,13 @@ return(
   gestureEnabled={true}
 
   onClose={() => {
+
+    posthog.capture('closed_sheet', {
+      screen: 'SellAmounts_Sheet',
+      $screen_name: 'SellAmounts_Sheet '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
+
     setValue("0")
     setRawValue("0")
     setValueShares("0")
@@ -1332,15 +1406,47 @@ return(
 
 
 
-        <View style={{
-          marginTop: height(18)
+   
+       <View style={{
+          position: 'absolute',
+          bottom: height(-9),
+          flexDirection: 'row'
         }}>
 
-     
-     
 
+        <TouchableOpacity onPress={() => {
 
+        posthog.capture('canceled_checkout_selling_asset', {
+          screen: 'SellAmounts_Sheet',
+          $screen_name: 'SellAmounts_Sheet '+" / "+coinData.name,
+          timestamp: new Date().toISOString(),
+          });
 
+          Promise.all([
+          SheetManager.hide("SellAmounts_Sheet"),
+         SheetManager.hide("OrderType_Sheet"),
+          SheetManager.hide("SellAmountType_Sheet")
+        ]).then(() => {
+          console.log("✅ All sheets closed!");
+        }).catch(err => console.error("❌ Error closing sheets:", err));
+      
+
+        }}
+        style={{
+            height: size(55),
+            width: size(55),
+            marginLeft: width(5),
+            backgroundColor:  CurrentViewMode.Mode_ButtonColor_Profile,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 10,
+        }}>
+            <MaterialIcons name="arrow-back-ios" style={{
+                fontSize: size(18),
+                color: CurrentViewMode.Mode_fontColor,
+
+            }} />
+        </TouchableOpacity>
 
 
 
@@ -1359,20 +1465,24 @@ return(
             <TouchableOpacity onPress={() => {
              
            
+             posthog.capture('open_coin_sell_confirmation_bottomsheet', {
+              screen: 'SellAmounts_Sheet',
+              $screen_name: 'SellAmounts_Sheet '+" / "+coinData.name,
+              timestamp: new Date().toISOString(),
+              })
+
               SheetManager.show("SellConfirmation_Sheet");
          
             }}
             disabled={value == 0 || AbleToBuy == false ? true : false}
             style={{
-              marginTop: 20,
               height: 50,
               backgroundColor: CurrentViewMode.Mode_fontColor,
               borderRadius: 10,
               position: 'absolute',
-              bottom: height(6),
             //  width: width(35),
               paddingHorizontal: 30,
-              right: width(7),
+              marginLeft: width(64),
               opacity: value == 0 || AbleToBuy == false  ? 0.3 :  100,
               flexDirection: 'row',
               alignItems: 'center',

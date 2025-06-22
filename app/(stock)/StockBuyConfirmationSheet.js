@@ -45,6 +45,8 @@ import { IFollowingsCoinsContext } from '../Context/OpenIFollowingsCoinsSheetCon
 import { SearchContext } from '../Context/MainSearchIndexStateContext';
 import { ToastMessageContext } from '../Context/ToastMessageContext';
 import { ViewModeContext } from '../Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
+
 
 
 
@@ -120,7 +122,7 @@ export const StockBuyOrderTypeSheetPage = () => {
     //backgroundInteractionEnabled={false}
     isModal={false}
     gestureEnabled={true}
- 
+    
      CustomHeaderComponent={
    <> 
    
@@ -377,6 +379,8 @@ export const StockBuyOrderTypeSheetPage = () => {
 const StockBuyConfirmationSheet =  React.memo(() => {
 
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
   const { t } = useTranslation();
 
   const currentUser = auth().currentUser;
@@ -514,8 +518,43 @@ const StockBuyConfirmationSheet =  React.memo(() => {
  }, []);
 
 
+ 
+
+
+
+
+ useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'StockBuyConfirmation_Sheet',
+    $screen_name: 'StockBuyConfirmation_Sheet '+" / "+coinData.name,
+    timestamp: new Date().toISOString(),
+  });
+}, []);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
  const CloseAddMoneyToAccountSheet = () => {
+
+  posthog.capture('did_not_finish_checkout_buying_asset', {
+    screen: 'StockBuyConfirmation_Sheet',
+    $screen_name: 'StockBuyConfirmation_Sheet '+" / "+coinData.name,
+    timestamp: new Date().toISOString(),
+    });
+
+
   SheetManager.hide("StockBuyConfirmation_Sheet");
 
   setBuyConfirmationSheetIndex(-1)
@@ -964,6 +1003,13 @@ return(
   gestureEnabled={true}
   isModal={false} 
   onClose={() => {
+
+    posthog.capture('closed_sheet', {
+      screen: 'StockBuyConfirmation_Sheet',
+      $screen_name: 'StockBuyConfirmation_Sheet '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
+  
     toastTriggered.current = false;
     setShowToast(false); // ✅ hide toast
   }}
@@ -1371,6 +1417,13 @@ const BuyCrypto = async () => {
          // ✅ Mark that an order was placed
          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
+
+         posthog.capture('successfully_finish_checkout_buying_asset', {
+          screen: 'StockBuyConfirmation_Sheet',
+          $screen_name: 'StockBuyConfirmation_Sheet '+" / "+coinData.name,
+          timestamp: new Date().toISOString(),
+          });
+
         // ✅ Step 2: wait for toast to show (you can adjust 600ms to match your animation)
         setTimeout(() => {
           Promise.all([
@@ -1387,6 +1440,13 @@ const BuyCrypto = async () => {
                 
           console.log("🚀 Triggered Transaction Check in Foreground");
         }) .catch((err) => {
+
+          posthog.capture('error_at_finish_checkout_buying_asset', {
+            screen: 'StockBuyConfirmation_Sheet',
+            $screen_name: 'StockBuyConfirmation_Sheet '+" / "+coinData.name,
+            timestamp: new Date().toISOString(),
+            });
+
           console.error("❌ Error Transaction Check in Foreground", err);
         });
   //    }

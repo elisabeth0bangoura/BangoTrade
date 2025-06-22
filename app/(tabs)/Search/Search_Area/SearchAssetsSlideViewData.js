@@ -36,6 +36,7 @@ import { CoinPageContext } from '@/app/Context/OpenCoinPageContext';
 import ActionSheet, {useSheetRef, SheetManager} from 'react-native-actions-sheet';
 import { FadeIn, FadeOut } from 'react-native-reanimated';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, setDoc, addDoc, onSnapshot } from "@react-native-firebase/firestore";
@@ -98,6 +99,7 @@ const SkeletonPlaceholder = () => {
 
 export default function SearchAssetsSlideViewData ({SearchIndex2, searchQuery})  {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
 
@@ -493,8 +495,13 @@ const [isFetchingCrypto, setIsFetchingCrypto] = useState(false);
 
 
     <TouchableOpacity onPress={() => {
-   
-
+  
+    posthog.capture('open_stock_bottomsheet', {
+      screen: 'Stock_Page',
+      $screen_name: 'Stock_Page '+" / "+item.name,
+      timestamp: new Date().toISOString(),
+      
+      });
 
   setCoinPageIndex(0)
   SheetManager.show('StockPage_Sheet',  {

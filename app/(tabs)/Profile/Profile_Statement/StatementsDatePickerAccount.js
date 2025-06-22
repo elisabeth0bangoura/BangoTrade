@@ -45,6 +45,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { ViewModeContext } from '../../../Context/ViewModeContext';
 
+import { usePostHog } from 'posthog-react-native';
 
 
 import firestore from '@react-native-firebase/firestore';
@@ -83,6 +84,10 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 const ITEM_HEIGHT = 50; // Height of each row
 
 const MonthYearPicker = ({ selectedDate, onValueChange, scrollRef }) => {
+
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t } = useTranslation();
 
@@ -133,13 +138,6 @@ const styles = StyleSheet.create({
     color: CurrentViewMode.Mode_fontColor,
   },
 });
-
-
-
-
-
-
-
 
 
 
@@ -254,6 +252,9 @@ export default function StatementsDatePickerAccount ()  {
 
 
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
   const router = useRouter();
 	const auth = getAuth();
 	const db = getFirestore();
@@ -342,6 +343,17 @@ export default function StatementsDatePickerAccount ()  {
 
 
 
+
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'StatementsDatePickerAccount_Sheet',
+        $screen_name: 'StatementsDatePickerAccount_Sheet',
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+    
+    
+    
 
 
 
@@ -688,6 +700,14 @@ export default function StatementsDatePickerAccount ()  {
                     const { uri } = await FileSystem.downloadAsync(downloadData.url, fileUri);
   
                     console.log("Downloaded to:", uri);
+
+
+
+                      posthog.capture('clicked_statements_date_picker_account_asset', {
+                        screen: 'StatementsDatePickerAccount_Sheet',
+                        $screen_name: 'StatementsDatePickerAccount_Sheet',
+                        timestamp: new Date().toISOString(),
+                        });
   
                     // ✅ Step 5: Open PDF using the share menu
                     if (await Sharing.isAvailableAsync()) {

@@ -29,11 +29,13 @@ import PinCodeContainer from './PinCodeContainer';
 import PinCodeComponent from './PinCodeComponent';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
 import { SheetManager } from 'react-native-actions-sheet';
+import { usePostHog } from 'posthog-react-native';
 
 
 
 export default function Pin() {
 
+    const posthog = usePostHog(); // ✅ Hook must be inside the component
 
 
 	const { t } = useTranslation();
@@ -108,53 +110,67 @@ export default function Pin() {
     const handleLogin = async (enteredPin) => {
         console.log("Entered PIN:", enteredPin);
         enteredPinRef.current = enteredPin;
-    
-       
-       
+      
         try {
-            console.log("🔍 Fetching users from Firestore...");
-            const querySnapshot = await getDocs(collection(firestore, "users"));
-            let userFound = false;
-    
-            querySnapshot.forEach((doc) => {
-                const userData = doc.data();
-                const storedPin = userData?.AppPin;
-                const storedPhone = normalizePhoneNumber(userData?.newAccountPayload?.contact?.phone_number);
-                const email = userData?.newAccountPayload?.contact?.email_address;
-                const password = userData?.Password;
-    
-                console.log("📞 Checking user:", doc.id, "Stored PIN:", storedPin, "Stored Phone:", storedPhone);
-    
-                // ✅ Normalize both storedPhone & PhonenumberLogIn before comparison
-                if (storedPin === enteredPinRef.current && storedPhone === normalizePhoneNumber(PhonenumberLogIn)) {
-                    userFound = true;
-                    userEmailRef.current = email;
-                    userPasswordRef.current = password;
-                }
-            });
-    
-            if (userFound && userEmailRef.current && userPasswordRef.current) {
-                signInWithEmailAndPassword(auth, userEmailRef.current, userPasswordRef.current)
-                    .then(() => {
-                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
-                        SheetManager.hide("LogIn_Sheet")
-                        console.log("✅ User logged in successfully!");
-                        setErrorMessage(null);
-                        router.replace("/(tabs)/Home/home");
-                    })
-                    .catch((error) => {
-                      
-                        console.error("❌ Firebase Auth Error:", error);
-                        setErrorMessage("Login Error: " + error.message);
-                    });
-            } else {
-                setErrorMessage("❌ Error: Invalid phone number or PIN.");
+          console.log("🔍 Fetching users from Firestore...");
+          const querySnapshot = await getDocs(collection(firestore, "users"));
+          
+          let userFound = false;
+          let matchedUserData = null; // ✅ Save the whole matched user data
+      
+          querySnapshot.forEach((doc) => {
+            const userData = doc.data();
+            const storedPin = userData?.AppPin;
+            const storedPhone = normalizePhoneNumber(userData?.newAccountPayload?.contact?.phone_number);
+            const email = userData?.newAccountPayload?.contact?.email_address;
+            const password = userData?.Password;
+      
+            if (storedPin === enteredPinRef.current && storedPhone === normalizePhoneNumber(PhonenumberLogIn)) {
+              userFound = true;
+              userEmailRef.current = email;
+              userPasswordRef.current = password;
+              matchedUserData = userData; // ✅ Save full data for PostHog
             }
+          });
+      
+          if (userFound && userEmailRef.current && userPasswordRef.current) {
+            signInWithEmailAndPassword(auth, userEmailRef.current, userPasswordRef.current)
+              .then(() => {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                SheetManager.hide("LogIn_Sheet");
+                console.log("✅ User logged in successfully!");
+                setErrorMessage(null);
+      
+                // ✅ IDENTIFY USER IN POSTHOG
+                posthog.identify(userEmailRef.current, {
+                  email: userEmailRef.current,
+                  phone: PhonenumberLogIn,
+                  firstName: matchedUserData?.newAccountPayload?.identity?.given_name,
+                  lastName: matchedUserData?.newAccountPayload?.identity?.family_name,
+                  isProUser: true,
+                  signupMethod: 'PIN',
+                });
+      
+                posthog.capture('login_success', {
+                  method: 'PIN',
+                  email: userEmailRef.current,
+                });
+      
+                router.replace("/(tabs)/Home/home");
+              })
+              .catch((error) => {
+                console.error("❌ Firebase Auth Error:", error);
+                setErrorMessage("Login Error: " + error.message);
+              });
+          } else {
+            setErrorMessage("❌ Error: Invalid phone number or PIN.");
+          }
         } catch (error) {
-            console.error("❌ Error fetching data:", error);
-            setErrorMessage("Error: Something went wrong.");
+          console.error("❌ Error fetching data:", error);
+          setErrorMessage("Error: Something went wrong.");
         }
-    };
+      };
+      
     
 
     

@@ -44,6 +44,8 @@ import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot } from "@reac
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
 
+import { usePostHog } from 'posthog-react-native';
+
 import { ReanimatedScrollView } from 'react-native-reanimated'; // If you want scroll-based animations
 import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
 import SkeletonLoading from 'expo-skeleton-loading'
@@ -58,6 +60,7 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 export default function DividendCancellationsSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -78,7 +81,7 @@ export default function DividendCancellationsSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const DividendCancellations_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -132,6 +135,14 @@ export default function DividendCancellationsSheet () {
 
 
 
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'DividendCancellations_Sheet',
+      $screen_name: 'DividendCancellations_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
 
 
 
@@ -498,7 +509,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={DividendCancellations_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -639,7 +650,7 @@ This can happen for several reasons:
  <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
@@ -694,9 +705,14 @@ This can happen for several reasons:
 
 
 <TouchableOpacity onPress={() => {
-          
+         
+          posthog.capture('close_dividend_cancellations_Sheet', {
+            screen: 'DividendCancellations_Sheet',
+            $screen_name: 'DividendCancellations_Sheet',
+            timestamp: new Date().toISOString(),
+          });
       
-      SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
+      SheetManager.hide("DividendCancellations_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

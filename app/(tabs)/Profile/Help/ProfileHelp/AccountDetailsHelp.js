@@ -49,6 +49,8 @@ import { getFirestore, getDoc, addDoc, collection, doc, onSnapshot } from "@reac
 import { useRouter } from "expo-router";
 import { getAuth, signOut, signInWithEmailAndPassword, onAuthStateChanged } from "@react-native-firebase/auth";
 
+import { usePostHog } from 'posthog-react-native';
+
 
 
 
@@ -62,6 +64,7 @@ import { getAuth, signOut, signInWithEmailAndPassword, onAuthStateChanged } from
 
 export default function AccountDetailsHelpSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
   const router = useRouter();
@@ -103,6 +106,16 @@ export default function AccountDetailsHelpSheet () {
   };
 
 
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'ManagePersonalInformation_Sheet',
+      $screen_name: 'ManagePersonalInformation_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
   useEffect(() => {
     // Ensure user.uid is available before making the request

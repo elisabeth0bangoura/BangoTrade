@@ -65,6 +65,7 @@ import { getFirestore, doc, getDoc } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
 import { getAuth, signOut, signInWithEmailAndPassword, onAuthStateChanged } from "@react-native-firebase/auth";
 import { CashContext } from '../Context/CashContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 const Tab = createMaterialTopTabNavigator();
@@ -78,13 +79,10 @@ const Tab = createMaterialTopTabNavigator();
 
 
 
-
-
-
-
 // Tab Navigation Component
 const Layout = React.memo (() => {
 
+	const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -190,6 +188,7 @@ const [AlpacaUserId, setAlpacaUserId] = useState(null);
 const sheetRefOpenFollowingsBottomSheet = useRef(null);
 
 
+const [Email, setEmail] = useState()
 const handleSheetChangeFollowingsBottomSheet = useCallback((index) => {
   setIFollowingsCoinsIndex(index);
 }, []);
@@ -207,7 +206,6 @@ useEffect(() => {
     sheetRefOpenFollowingsBottomSheet.current?.close();
   }
 }, [IFollowingsCoinsIndex]);
-
 
 
 
@@ -361,6 +359,7 @@ useEffect(() => {
   
 		  setAlpacaUserId(userDocument.data().AlpacaAccountId)
   
+		  setEmail(userDocument.data().Email)
 	
 		   // Check bank relationShip
 		
@@ -908,6 +907,14 @@ const renderBackdropOpenAddMoreIFollowCoins = useCallback(
 
 
 
+
+
+
+
+
+	  
+
+
 	
 
 
@@ -979,6 +986,13 @@ const renderBackdropOpenAddMoreIFollowCoins = useCallback(
 
 
 				
+					
+				posthog.capture('open_deposit_way_bottomsheet', {
+					screen: 'Home',
+					$screen_name: 'Home',
+					timestamp: new Date().toISOString(),
+					
+				});
 			
 
 
@@ -1132,6 +1146,15 @@ const renderBackdropOpenAddMoreIFollowCoins = useCallback(
 
 			<TouchableOpacity
               onPress={() => {
+
+				posthog.capture('open_widthraw_way_bottomsheet', {
+					screen: 'Home',
+					$screen_name: 'Home',
+					timestamp: new Date().toISOString(),
+					
+				});
+			
+
 				//setShowTrasnferBtn(false)
 				if(AvailbleCashTransferBalance == 0 || AvailbleCashTransferBalance == undefined) {	
 					setShowNoMoneyToWidthraw(true)
@@ -1195,6 +1218,14 @@ const renderBackdropOpenAddMoreIFollowCoins = useCallback(
 
 			<TouchableOpacity
               onPress={() => {
+		
+				posthog.capture('open_deposit_way_bottomsheet', {
+					screen: 'Home',
+					$screen_name: 'Home',
+					timestamp: new Date().toISOString(),
+					
+				});
+			
 
 
 					// Fetch data from the Firestore path
@@ -1341,6 +1372,14 @@ const renderBackdropOpenAddMoreIFollowCoins = useCallback(
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
+
+				posthog.capture('open_widthraw_way_bottomsheet', {
+					screen: 'Home',
+					$screen_name: 'Home',
+					timestamp: new Date().toISOString(),
+					
+				});
+			
 				//setShowTrasnferBtn(false)
 
 				if(AvailbleCashTransferBalance == 0 || AvailbleCashTransferBalance == undefined) {	
@@ -1432,7 +1471,16 @@ const renderBackdropOpenAddMoreIFollowCoins = useCallback(
 
 		
 			<TouchableOpacity
-			onPress={handlePress}
+			onPress={() => {
+				posthog.capture('clicked_close_transfer_button', {
+					screen: 'Home',
+					$screen_name: 'Home',
+					timestamp: new Date().toISOString(),
+					
+				});
+		
+				handlePress()
+			}}
 			activeOpacity={0.8}
 			style={{
 			
@@ -1485,7 +1533,15 @@ const renderBackdropOpenAddMoreIFollowCoins = useCallback(
 			?
 
 		<TouchableOpacity
-		 onPress={handlePress}
+		 onPress={() => {
+			posthog.capture('clicked_close_transfer_button', {
+				screen: 'Home',
+				$screen_name: 'Home',
+				timestamp: new Date().toISOString(),
+				
+			});
+			handlePress()
+		}}
 		 activeOpacity={0.8}
 		 style={{
 		 
@@ -1537,7 +1593,15 @@ const renderBackdropOpenAddMoreIFollowCoins = useCallback(
 			?
 
 			<TouchableOpacity
-		 onPress={handlePress}
+			 onPress={() => {
+			posthog.capture('clicked_close_transfer_button', {
+				screen: 'Home',
+				$screen_name: 'Home',
+				timestamp: new Date().toISOString(),
+				
+			});
+			handlePress()
+		}}
 		 activeOpacity={0.8}
 		 style={{
 		 
@@ -1588,7 +1652,15 @@ const renderBackdropOpenAddMoreIFollowCoins = useCallback(
 
 
       <TouchableOpacity
-        onPress={handlePress}
+        onPress={() => {
+			posthog.capture('clicked_close_transfer_button', {
+				screen: 'Home',
+				$screen_name: 'Home',
+				timestamp: new Date().toISOString(),
+				
+			});
+			handlePress()
+		}}
         activeOpacity={0.8}
         style={{
           height: 55,
@@ -1630,7 +1702,15 @@ const renderBackdropOpenAddMoreIFollowCoins = useCallback(
 
 	  		
 		 <TouchableOpacity
-		 onPress={handlePress}
+		 onPress={() => {
+			posthog.capture('clicked_transfer_button', {
+				screen: 'Home',
+				$screen_name: 'Home',
+				timestamp: new Date().toISOString(),
+				
+			});
+			handlePress()
+		}}
 		 activeOpacity={0.8}
 		 style={{
 			alignItems: 'center',
@@ -1708,17 +1788,24 @@ IFollowingsCoinsIndex == 0 || CoinPageIndex == 0 || SearchIndex == 0
 
 	:
 
-
-
-
-		<TouchableOpacity
+    <TouchableOpacity
 	 onPress={() => {
+
+		posthog.capture('open_search_bottomsheet', {
+			screen: 'Home',
+			timestamp: new Date().toISOString(),
+			
+		  });
+	  
+
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
 		//handleSnapPress(0)
 
 		SheetManager.show('SearchPage_Sheet');
 		setSearchIndex(0); 
-		
+
+
+		  
 	}} 
 		  style={{
 			height: size(55),

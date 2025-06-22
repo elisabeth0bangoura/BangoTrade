@@ -46,6 +46,7 @@ import { ToastMessageContext } from '../Context/ToastMessageContext';
 import { ViewModeContext } from '../Context/ViewModeContext';
 import { t } from 'i18next';
 
+import { usePostHog } from 'posthog-react-native';
 
 import firestore from '@react-native-firebase/firestore';
 
@@ -75,8 +76,10 @@ import SellConfirmationSheet from '../(coin)/SellConfirmationSheet';
 
 
 
+
 export const StockSellOrderTypeSheetPage = () => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t } = useTranslation();
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -102,6 +105,27 @@ export const StockSellOrderTypeSheetPage = () => {
       setSharesSellAmount, } = useContext(SellAmountContext);
 
 
+      const { 
+        CoinPageIndex, 
+        setCoinPageIndex,  
+        CurrentBackgroundColorForCoin, 
+        setCurrentBackgroundColorForCoin, coinData, setCoinData, coinSymbol, setCoinSymbol  } = useContext(CoinPageContext);
+    
+
+
+
+
+
+
+
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'Stock_Sell_OrderType_Sheet',
+        $screen_name: 'Stock_Sell_OrderType_Sheet '+" / "+coinData.name,
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+
 
 
   useEffect(() => {
@@ -123,7 +147,6 @@ export const StockSellOrderTypeSheetPage = () => {
     //backgroundInteractionEnabled={false}
     isModal={false}
     gestureEnabled={true}
- 
      CustomHeaderComponent={
    <> 
    
@@ -188,9 +211,17 @@ export const StockSellOrderTypeSheetPage = () => {
            </Text>
  
  
- 
+           
  
            <TouchableOpacity onPress={() => {
+
+            posthog.capture('open_stock_sellamounts_bottomsheet', {
+              screen: 'Stock_Sell_OrderType_Sheet',
+              $screen_name: 'Stock_Sell_OrderType_Sheet '+" / "+coinData.name,
+              timestamp: new Date().toISOString(),
+              });
+
+
              setCurrentBuyType("Amount")
              setValueShares("0")
              setRawValuShares("0")
@@ -272,6 +303,13 @@ export const StockSellOrderTypeSheetPage = () => {
  
  
            <TouchableOpacity onPress={() => {
+
+            posthog.capture('open_stock_sellamounts_shares_bottomsheet', {
+              screen: 'Stock_Sell_OrderType_Sheet',
+              $screen_name: 'Stock_Sell_OrderType_Sheet '+" / "+coinData.name,
+              timestamp: new Date().toISOString(),
+              });
+
              setCurrentBuyType("Shares")
              setValue("0")
              setRawValue("0")
@@ -381,6 +419,7 @@ export const StockSellOrderTypeSheetPage = () => {
 
 
 const StockSellConfirmationSheet =  React.memo(() => {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t } = useTranslation();
 
@@ -525,7 +564,13 @@ const StockSellConfirmationSheet =  React.memo(() => {
 
 
   
-
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Stock_SellAmounts_Sheet',
+      $screen_name: 'Stock_SellAmounts_Sheet '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 
@@ -906,10 +951,14 @@ return(
   ref={Stock_SellConfirmation_Sheet}
 
   isModal={false} 
-
   backgroundInteractionEnabled={false}
   gestureEnabled={true}
   onClose={() => {
+    posthog.capture('closed_sheet', {
+      screen: 'Stock_SellConfirmation_Sheet',
+      $screen_name: 'Stock_SellConfirmation_Sheet '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
     toastTriggered.current = false;
     setShowToastSell(false); // ✅ hide toast
 
@@ -1266,7 +1315,16 @@ style={{
                bottom: height(6),
                flexDirection: 'row'
         }}>
-        <TouchableOpacity onPress={() =>  SheetManager.hide("Stock_SellConfirmation_Sheet")}
+        <TouchableOpacity onPress={() => {
+
+
+        posthog.capture('canceled_checkout_selling_asset', {
+          screen: 'Stock_SellConfirmation_Sheet',
+          $screen_name: 'Stock_SellConfirmation_Sheet '+" / "+coinData.name,
+          timestamp: new Date().toISOString(),
+          });
+
+           SheetManager.hide("Stock_SellConfirmation_Sheet")}}
         style={{
             height: size(55),
             width: size(55),
@@ -1323,6 +1381,15 @@ const SellCrypto = async () => {
 
          // ✅ Mark that an order was placed
          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+
+
+         posthog.capture('successfully_finish_checkout_selling_asset', {
+          screen: 'Stock_SellConfirmation_Sheet',
+          $screen_name: 'Stock_SellConfirmation_Sheet '+" / "+coinData.name,
+          timestamp: new Date().toISOString(),
+          });
+
 
         // ✅ Step 2: wait for toast to show (you can adjust 600ms to match your animation)
         setTimeout(() => {

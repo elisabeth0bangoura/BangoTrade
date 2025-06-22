@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { width, height, size } from "react-native-responsive-sizes"; 
 import axios from 'axios';
 
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -61,6 +62,7 @@ import { CoinPageContext } from '@/app/Context/OpenCoinPageContext';
 export default function DividendsSheet () {
   
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 	const router = useRouter();
 	const auth = getAuth();
@@ -80,7 +82,7 @@ export default function DividendsSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const Dividends_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -139,6 +141,15 @@ export default function DividendsSheet () {
   };
   
 
+  
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Dividends_Sheet',
+      $screen_name: 'Dividends_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
   
 
 
@@ -561,6 +572,15 @@ const filteredCategories = selectedCategory
           {item.subcategories &&
           item.subcategories.map((subcategory, index) => (
                 <TouchableOpacity onPress={() => {
+
+                  
+                  posthog.capture(`clicked_help_asset_Dividends_${subcategory.linkName}_bottomsheet`, {
+                    screen: 'Dividends_Sheet',
+                    $screen_name: 'Dividends_Sheet',
+                    timestamp: new Date().toISOString(),
+                
+                    });
+                  
                   SheetManager.show(subcategory.linkName)
                 }}
                 key={index} style={{
@@ -642,6 +662,15 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
         onPress={() => {
           // Handle item press if needed
           if(item.asset_class == "us_equity") {
+
+            posthog.capture('open_stock_bottomsheet', {
+              screen: 'Dividends_Sheet',
+              $screen_name: 'Dividends_Sheet '+" / "+item.name,
+              timestamp: new Date().toISOString(),
+          
+              });
+
+
         
             setCoinPageIndex(0)
             SheetManager.show('StockPage_Sheet',  {
@@ -659,6 +688,14 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
            } 
            if(item.asset_class == "crypto") {
+
+
+          posthog.capture('open_coin_bottomsheet', {
+            screen: 'Dividends_Sheet',
+            $screen_name: 'Dividends_Sheet '+" / "+item.name,
+            timestamp: new Date().toISOString(),
+        
+            });
      
             SheetManager.show('CoinPage_Sheet',  {
               payload: { value: item.symbol }, // Passing dynamic data (payload)
@@ -754,7 +791,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={Dividends_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -954,15 +991,20 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
  <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
 
 <TouchableOpacity onPress={() => {
-          
-      
-      SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
+
+  posthog.capture('close_dividends_Sheet', {
+    screen: 'Dividends_Sheet',
+    $screen_name: 'Dividends_Sheet',
+    timestamp: new Date().toISOString(),
+  });
+  
+  SheetManager.hide("Dividends_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

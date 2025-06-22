@@ -45,6 +45,7 @@ import { ViewModeContext } from '@/app/Context/ViewModeContext';
 import { getFirestore, doc, getDoc } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
 import { getAuth, signOut, signInWithEmailAndPassword, onAuthStateChanged } from "@react-native-firebase/auth";
+import { usePostHog } from 'posthog-react-native';
 
 const HEADER_HEIGHT = 300; // The height of the header
 
@@ -71,6 +72,7 @@ const HEADER_HEIGHT = 300; // The height of the header
 
 
 const WidthrawWay =  React.memo(({ AssetSupply}) => {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
   const user = getAuth().currentUser;
@@ -176,6 +178,28 @@ const WidthrawWay =  React.memo(({ AssetSupply}) => {
       const [UserLastName, setUserLastName] = useState("")
     
 
+
+
+
+
+
+
+
+
+
+
+
+
+         
+      useEffect(() => {
+        posthog.capture('screen_viewed', {
+          screen: 'WidthrawWay',
+          $screen_name: 'WidthrawWay',
+          timestamp: new Date().toISOString(),
+        });
+      }, []);
+      
+
    
       
 
@@ -184,11 +208,6 @@ const WidthrawWay =  React.memo(({ AssetSupply}) => {
     
        
       useEffect(() => {
-    
-
-
-
-
 
         // Fetch data from the Firestore path
         const fetchUserData = async () => {
@@ -675,6 +694,14 @@ const WidthrawWay =  React.memo(({ AssetSupply}) => {
 
 
           <TouchableOpacity onPress={() => {
+
+
+          posthog.capture('open_widthraw_bottomsheet', {
+            screen: 'WidthrawWay',
+            $screen_name: 'WidthrawWay',
+            timestamp: new Date().toISOString(),
+            
+          });
 
             if(AvailbleCashTransferBalance == 0 || AvailbleCashTransferBalance == undefined){
               setShowNoMoneyToWidthraw(true)

@@ -44,6 +44,7 @@ import firestore from '@react-native-firebase/firestore';
 import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot } from "@react-native-firebase/firestore";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 import { ReanimatedScrollView } from 'react-native-reanimated'; // If you want scroll-based animations
 import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
@@ -59,6 +60,8 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 export default function CryptotypesSheet () {
   
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -79,7 +82,7 @@ export default function CryptotypesSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const Cryptotypes_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -133,6 +136,15 @@ export default function CryptotypesSheet () {
 
 
 
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Cryptotypes_Sheet',
+      $screen_name: 'Cryptotypes_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
 
 
 
@@ -410,6 +422,13 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
     return (
       <TouchableOpacity
         onPress={() => {
+
+          posthog.capture('open_coin_bottomsheet', {
+            screen: 'Cryptotypes_Sheet',
+            $screen_name: 'Cryptotypes_Sheet '+" / "+item.name,
+            timestamp: new Date().toISOString(),
+        
+            });
           // Handle item press if needed
           setCoinPageIndex(0);
           SheetManager.show('CoinPage_Sheet');
@@ -499,7 +518,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={Cryptotypes_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -608,7 +627,7 @@ This means that each crypto order will be executed instantly at the current mark
  <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
@@ -664,8 +683,15 @@ This means that each crypto order will be executed instantly at the current mark
 
 <TouchableOpacity onPress={() => {
           
+          posthog.capture('close_cryptotypes_Sheet', {
+            screen: 'Cryptotypes_Sheet',
+            $screen_name: 'Cryptotypes_Sheet',
+            timestamp: new Date().toISOString(),
+          });
       
-      SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
+
+      
+      SheetManager.hide("Cryptotypes_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

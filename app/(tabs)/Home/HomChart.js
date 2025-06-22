@@ -321,7 +321,8 @@ const formatWeeklyData = (data) => {
           return;
         }
   
-        const percentageChange = lastEquity !== 0 ? ((equity - lastEquity) / lastEquity) * 100 : 0;
+        const percentageChange =
+          lastEquity !== 0 ? ((equity - lastEquity) / lastEquity) * 100 : 0;
         const dollarChange = equity - lastEquity;
   
         const isNegative = percentageChange < 0 || dollarChange < 0;
@@ -331,22 +332,23 @@ const formatWeeklyData = (data) => {
         setPriceChangeColor(isNegative ? "#FE1B20" : "#00CE39");
         setCurrentPrice(equity);
   
-        // Only push new point if it changed
         if (lastKnownPrice !== equity) {
           lastKnownPrice = equity;
   
           setPortfolioData((prevData) => {
             const newPoint = {
-              timestamp: Date.now(), // ✅ Always use current time
+              timestamp: Date.now(),
               value: equity,
             };
   
-            // ✅ Avoid duplicate value if it matches the last one
-            if (prevData.length > 0 && prevData[prevData.length - 1].value === equity) {
+            if (
+              prevData.length > 0 &&
+              prevData[prevData.length - 1].value === equity
+            ) {
               return prevData;
             }
   
-            return [...prevData, newPoint].slice(-300); // Keep last 300 points max
+            return [...prevData, newPoint].slice(-300);
           });
         }
       } catch (error) {
@@ -354,38 +356,77 @@ const formatWeeklyData = (data) => {
       }
     };
   
-    interval = setInterval(fetchRealTimePortfolioValue, 6000); // ✅ every 6 seconds
-    fetchRealTimePortfolioValue(); // Fetch once immediately
+    interval = setInterval(fetchRealTimePortfolioValue, 6000);
+    fetchRealTimePortfolioValue();
   
     return () => {
       clearInterval(interval);
     };
   }, [AlpacaUserId, selectedPeriod, StopRealtimeInHomeChart1D]);
   
-
-
-
-
-
-
-
-useEffect(() => {
-  // Preload 1D data immediately when the app loads
-  console.log("⏳ Preloading 1D data...");
-  preloadPortfolioHistory('1W');  // Preload 1D data on app start
-}, []);  // Empty dependency array ensures this runs only once when the component mounts
-
-useEffect(() => {
-  if (!selectedPeriod) return;
-
-  console.log(`⏳ Fetching data for selected period: ${selectedPeriod}`);
-
-  // Immediately fetch new period data without unnecessary delay
-  preloadPortfolioHistory(selectedPeriod);
-
-}, [selectedPeriod]);  // This effect runs when the selectedPeriod changes
-
-
+  // ✅ Fix preload for 1D to avoid API 500 error
+  useEffect(() => {
+    const preloadInitial1DData = async () => {
+      if (!AlpacaUserId || selectedPeriod !== "1D" || cachedData["1D"]) return;
+  
+      console.log("📦 Preloading 1D historical data initially...");
+  
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  
+      try {
+        const response = await fetch(
+          `https://broker-api.sandbox.alpaca.markets/v1/trading/accounts/${AlpacaUserId}/account/portfolio/history?start=${oneDayAgo.toISOString()}&end=${now.toISOString()}&timeframe=1Min&intraday_reporting=continuous&pnl_reset=no_reset`,
+          {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              authorization:
+                "Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA==",
+            },
+          }
+        );
+  
+        const data = await response.json();
+  
+        if (data && data.timestamp && data.equity) {
+          const formatted = data.timestamp.map((timestamp, index) => ({
+            timestamp: timestamp * 1000,
+            value: data.equity[index],
+          }));
+  
+          const downsampled = formatted.slice(-50);
+  
+          setPortfolioData(downsampled);
+          updateGrowthMetrics(downsampled);
+          setCachedData((prev) => ({ ...prev, ["1D"]: downsampled }));
+  
+          console.log("✅ Initial 1D preload done.");
+        } else {
+          console.warn("⚠️ Failed to preload 1D data:", data);
+        }
+      } catch (error) {
+        console.error("❌ Error during preload of 1D:", error);
+      }
+    };
+  
+    preloadInitial1DData();
+  }, [AlpacaUserId, selectedPeriod, cachedData]);
+  
+  // ✅ Existing preload for startup
+  useEffect(() => {
+    console.log("⏳ Preloading 1D data...");
+    preloadPortfolioHistory("1W"); // keep if intentional
+  }, []);
+  
+  // ✅ On period change
+  useEffect(() => {
+    if (!selectedPeriod) return;
+  
+    console.log(`⏳ Fetching data for selected period: ${selectedPeriod}`);
+    preloadPortfolioHistory(selectedPeriod);
+  }, [selectedPeriod]);
+  
 
 
 
@@ -422,10 +463,28 @@ const preloadPortfolioHistory = useCallback(async (period) => {
         return;
       }
 
-      const formattedData = data.timestamp.map((timestamp, index) => ({
-        timestamp: timestamp * 1000, // Convert timestamp to milliseconds
-        value: data.equity[index],
-      }));
+      let formattedData = [];
+
+      if (data.timestamp.length === data.equity.length) {
+        // ✅ Standardfall: timestamp und equity passen 1:1
+        formattedData = data.timestamp.map((timestamp, index) => ({
+          timestamp: timestamp * 1000,
+          value: data.equity[index],
+        }));
+      } else {
+        // ⚠️ Notfall: Timestamps fehlen oder stimmen nicht überein
+        const now = Date.now();
+        const totalDuration = period === '1M' ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+        const interval = Math.floor(totalDuration / data.equity.length);
+        
+        
+        formattedData = data.equity.map((value, index) => ({
+          timestamp: now - (data.equity.length - 1 - index) * interval,
+          value: value,
+        }));
+      }
+      
+      
 
       allData = [...allData, ...formattedData];
 
@@ -1087,7 +1146,7 @@ const memoizedXAxisLabels = useMemo(() => {
           </LineChart.Path>
           <LineChart.CursorCrosshair  color={CurrentViewMode.Mode_StockLine}>  {/*color={priceChangeColor}>*/}
             <LineChart.HoverTrap />
-            <LineChart.Tooltip textStyle={{ color: '#fff', fontSize: 13 }} />
+            <LineChart.Tooltip textStyle={{ color: CurrentViewMode.Mode_fontColor, fontSize: 13 }} />
           </LineChart.CursorCrosshair>
         </LineChart>
 

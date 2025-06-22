@@ -34,6 +34,7 @@ import { CoinPageContext } from '@/app/Context/OpenCoinPageContext';
 import { CurrentCoinSelectedContext } from '@/app/Context/CurrentCoinSelectedContext';
 import ActionSheet, {useSheetRef, SheetManager} from 'react-native-actions-sheet';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -56,6 +57,8 @@ const Tab = createMaterialTopTabNavigator();
 
 
 export default function SearchFilter_HighestVolume({ SearchIndex3 }) {
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
@@ -236,6 +239,14 @@ const renderItem = useCallback(({ item }) => {
 
 
      <TouchableOpacity onPress={() => {
+
+      posthog.capture('open_coin_page_bottomsheet', {
+        screen: 'SearchFilterPage_Sheet',
+        $screen_name: 'SearchFilterPage_Sheet '+" / "+item.name,
+        timestamp: new Date().toISOString(),
+    
+        });
+
       setCurrentCoinSelected(item)
       setCoinPageIndex(0);
       SheetManager.show('CoinPage_Sheet');
@@ -350,10 +361,21 @@ const renderItem = useCallback(({ item }) => {
 
 
 
- <TouchableOpacity onPress={() => {
-  const newSortOrder = SelectedSortPrice === "price_desc" ? "price_asc" : "price_desc";
-  setSelectedSortPrice(newSortOrder);
-  fetchHighestVolumeCoins(newSortOrder, "price");
+      <TouchableOpacity onPress={() => {
+
+
+
+      posthog.capture('click_search_filter_price_crypto_button', {
+        screen: 'SearchFilterPage_Sheet',
+        $screen_name: 'SearchFilterPage_Sheet',
+        timestamp: new Date().toISOString(),
+
+        });
+
+
+        const newSortOrder = SelectedSortPrice === "price_desc" ? "price_asc" : "price_desc";
+        setSelectedSortPrice(newSortOrder);
+        fetchHighestVolumeCoins(newSortOrder, "price");
 
      }}
      style={{
@@ -389,9 +411,18 @@ const renderItem = useCallback(({ item }) => {
 
 
         <TouchableOpacity onPress={() => {
-  const newSortOrder = SelectedSort24hVolume === "volume_desc" ? "volume_asc" : "volume_desc";
-  setSelectedSort24hVolume(newSortOrder);
-  fetchHighestVolumeCoins(newSortOrder, "volume");
+
+        posthog.capture('click_search_filter_volume_crypto_button', {
+          screen: 'SearchFilterPage_Sheet',
+          $screen_name: 'SearchFilterPage_Sheet',
+          timestamp: new Date().toISOString(),
+
+          });
+
+
+          const newSortOrder = SelectedSort24hVolume === "volume_desc" ? "volume_asc" : "volume_desc";
+          setSelectedSort24hVolume(newSortOrder);
+          fetchHighestVolumeCoins(newSortOrder, "volume");
         }}
         style={{
           backgroundColor: CurrentViewMode.Mode_Secbg_Buttons_Cash,

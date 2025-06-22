@@ -43,6 +43,7 @@ import * as Sharing from 'expo-sharing';
 import { ViewModeContext } from '../../Context/ViewModeContext';
 
 import firestore from '@react-native-firebase/firestore';
+import { usePostHog } from 'posthog-react-native';
 
 
 import { getFirestore, getDoc, addDoc, collection, doc, onSnapshot } from "@react-native-firebase/firestore";
@@ -62,6 +63,8 @@ import { getAuth, signOut, signInWithEmailAndPassword, onAuthStateChanged } from
 
 export default function AccountDetailsSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
 
   const router = useRouter();
@@ -101,6 +104,20 @@ export default function AccountDetailsSheet () {
       authorization: 'Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA=='
     }
   };
+
+
+
+
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'AccountDetails_Sheet',
+      $screen_name: 'AccountDetails_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 

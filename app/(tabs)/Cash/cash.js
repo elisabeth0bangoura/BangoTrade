@@ -25,6 +25,8 @@ import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
 import { HomeChartContext } from '@/app/Context/HomeChartContext';
+import { SearchContext } from '@/app/Context/MainSearchIndexStateContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -39,6 +41,7 @@ const HEADER_HEIGHT = 300; // The height of the header
 
 export const TransactionSheetPage = () => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 	const router = useRouter();
 	const auth = getAuth();
@@ -97,6 +100,21 @@ export const TransactionSheetPage = () => {
 
 
   
+
+
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Transaction_Sheet',
+      $screen_name: 'Transaction_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
+
+
 
 
 
@@ -579,6 +597,14 @@ console.log("✅ First initial:", firstInitial);
     return (
       <TouchableOpacity onPress={() => {
         if(item.activity_type === "CSW") {
+
+          posthog.capture('open_transaction_recepie_widthraw_bottomsheet', {
+            screen: 'Transaction_Sheet',
+            $screen_name: 'Transaction_Sheet',
+            timestamp: new Date().toISOString(),
+          
+            });
+            
           setCurrentChoosedAsset(item);
           SheetManager.show("TransactionRecepieWidthraw_Sheet", {
             payload: { selectedItem: item },
@@ -586,6 +612,14 @@ console.log("✅ First initial:", firstInitial);
         }
   
         if(item.activity_type === "CSD") {
+
+          posthog.capture('open_transaction_recepie_deposit_bottomsheet', {
+            screen: 'Transaction_Sheet',
+            $screen_name: 'Transaction_Sheet',
+            timestamp: new Date().toISOString(),
+          
+            });
+
           setCurrentChoosedAsset(item);
           SheetManager.show("TransactionRecepieDeposit_Sheet", {
             payload: { selectedItem: item },
@@ -593,6 +627,14 @@ console.log("✅ First initial:", firstInitial);
         }
   
         if(item.side === "sell") {
+
+          posthog.capture('open_transaction_sold_assets_bottomsheet', {
+            screen: 'Transaction_Sheet',
+            $screen_name: 'Transaction_Sheet',
+            timestamp: new Date().toISOString(),
+          
+            });
+
           setCurrentChoosedAsset(item);
           SheetManager.show("TransactionRecepieSoldAssets_Sheet", {
             payload: { selectedItem: item },
@@ -600,6 +642,16 @@ console.log("✅ First initial:", firstInitial);
         }
   
         if(item.side === "buy") {
+
+
+          posthog.capture('open_transaction_brought_assets_bottomsheet', {
+            screen: 'Transaction_Sheet',
+            $screen_name: 'Transaction_Sheet',
+            timestamp: new Date().toISOString(),
+          
+            });
+
+
           setCurrentChoosedAsset(item);
           SheetManager.show("TransactionRecepieBroughtAssets_Sheet", {
             payload: { selectedItem: item },
@@ -924,6 +976,15 @@ console.log("✅ First initial:", firstInitial);
   :
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_transaction_no_filter_bottomsheet', {
+  screen: 'Transaction_Sheet',
+  $screen_name: 'Transaction_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
+
   handleFilterChange("")
 }}
 style={{
@@ -950,6 +1011,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+          
+posthog.capture('open_transaction_investment_filter_bottomsheet', {
+  screen: 'Transaction_Sheet',
+  $screen_name: 'Transaction_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
   handleFilterChange(t("InvestmentHeaderInCashComponent"))
 
 }}
@@ -975,6 +1044,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_transaction_deposits_filter_bottomsheet', {
+  screen: 'Transaction_Sheet',
+  $screen_name: 'Transaction_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
   handleFilterChange(t("DepositsHeaderInCashComponent"))
 }}
 style={{
@@ -999,6 +1076,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_transaction_withdraws_filter_bottomsheet', {
+  screen: 'Transaction_Sheet',
+  $screen_name: 'Transaction_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
   handleFilterChange(t("WithdrawsHeaderInCashComponent"))
 }}
 style={{
@@ -1036,6 +1121,16 @@ style={{
   :
 
 <TouchableOpacity onPress={() => {
+
+
+posthog.capture('open_transaction_no_filter_bottomsheet', {
+  screen: 'Transaction_Sheet',
+  $screen_name: 'Transaction_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
+
   handleFilterChange("")
 }}
 style={{
@@ -1060,6 +1155,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+        
+posthog.capture('open_transaction_investment_filter_bottomsheet', {
+  screen: 'Transaction_Sheet',
+  $screen_name: 'Transaction_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
   handleFilterChange(t("InvestmentHeaderInCashComponent"))
 }}
 style={{
@@ -1084,6 +1187,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+         
+posthog.capture('open_transaction_deposits_filter_bottomsheet', {
+  screen: 'Transaction_Sheet',
+  $screen_name: 'Transaction_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
   handleFilterChange(t("DepositsHeaderInCashComponent"))
 }}
 style={{
@@ -1108,6 +1219,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_transaction_withdraws_filter_bottomsheet', {
+  screen: 'Transaction_Sheet',
+  $screen_name: 'Transaction_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
   handleFilterChange(t("WithdrawsHeaderInCashComponent"))
 }}
 style={{
@@ -1254,6 +1373,8 @@ const Cash = () => {
 
 
     
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 	const user = getAuth().currentUser;
   
 
@@ -1266,6 +1387,7 @@ const Cash = () => {
   const { t } = useTranslation();
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
+  const { SearchIndex, setSearchIndex, SearchLoading, setSearchLoading } = useContext(SearchContext);
 
 
 
@@ -1309,6 +1431,15 @@ const Cash = () => {
 
 
 
+  
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Cash',
+      $screen_name: 'Cash',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
   
   
 
@@ -1763,6 +1894,8 @@ console.log("✅ First initial:", firstInitial);
     return (
       isLoading ? (
         <SkeletonPlaceholder />
+
+
       ) : (
 
         item.activity_type == "FEE" 
@@ -1775,7 +1908,18 @@ console.log("✅ First initial:", firstInitial);
 
         <TouchableOpacity
           onPress={() => {
+
+
+
             if (item.activity_type === "CSW") {
+                
+              posthog.capture('open_transaction_recepie_widthraw_bottomsheet', {
+                screen: 'Cash',
+                $screen_name: 'Cash',
+                timestamp: new Date().toISOString(),
+              
+                });
+
               setCurrentChoosedAsset(item);
               SheetManager.show("TransactionRecepieWidthraw_Sheet", {
                 payload: { selectedItem: item },
@@ -1783,6 +1927,15 @@ console.log("✅ First initial:", firstInitial);
             }
   
             if (item.activity_type === "CSD") {
+
+                    
+              posthog.capture('open_transaction_recepie_deposit_bottomsheet', {
+                screen: 'Cash',
+                $screen_name: 'Cash',
+                timestamp: new Date().toISOString(),
+              
+                });
+
               setCurrentChoosedAsset(item);
               SheetManager.show("TransactionRecepieDeposit_Sheet", {
                 payload: { selectedItem: item },
@@ -1790,6 +1943,15 @@ console.log("✅ First initial:", firstInitial);
             }
   
             if (item.side === "sell") {
+
+                        
+              posthog.capture('open_transaction_recepie_sold_assets_bottomsheet', {
+                screen: 'Cash',
+                $screen_name: 'Cash',
+                timestamp: new Date().toISOString(),
+              
+                });
+
               setCurrentChoosedAsset(item);
               SheetManager.show("TransactionRecepieSoldAssets_Sheet", {
                 payload: { selectedItem: item },
@@ -1797,6 +1959,15 @@ console.log("✅ First initial:", firstInitial);
             }
   
             if (item.side === "buy") {
+
+                           
+              posthog.capture('open_transaction_recepie_brought_assets_bottomsheet', {
+                screen: 'Cash',
+                $screen_name: 'Cash',
+                timestamp: new Date().toISOString(),
+              
+                });
+
               setCurrentChoosedAsset(item);
               SheetManager.show("TransactionRecepieBroughtAssets_Sheet", {
                 payload: { selectedItem: item },
@@ -1960,7 +2131,7 @@ console.log("✅ First initial:", firstInitial);
 
 
       {
-        ShowHomeChart == true
+         SearchIndex == -1 
 
         ?
 
@@ -2057,6 +2228,14 @@ style={{
 */}
 
     <TouchableOpacity onPress={() => {
+
+        posthog.capture('open_transaction_bottomsheet', {
+          screen: 'Cash',
+          $screen_name: 'Cash',
+          timestamp: new Date().toISOString(),
+
+          });
+
       SheetManager.show("Transaction_Sheet")
     }} style={{
       marginTop: height(11),

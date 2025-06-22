@@ -38,6 +38,7 @@ import { CurrentCoinSelectedContext } from '@/app/Context/CurrentCoinSelectedCon
 import { SheetManager } from 'react-native-actions-sheet';
 import { SearchContext } from '@/app/Context/MainSearchIndexStateContext';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 const Tab = createMaterialTopTabNavigator();
@@ -53,6 +54,7 @@ const Tab = createMaterialTopTabNavigator();
 
     const StableCoinBottomSheetData = React.memo(() => {
 
+      const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
       const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -189,6 +191,14 @@ const renderItemStableCoins = useCallback(
       return (
         <TouchableOpacity
           onPress={() => {
+
+              
+            posthog.capture('open_coin_bottomsheet', {
+              screen: 'Coin_Page',
+              $screen_name: 'Coin_Page '+" / "+item.name,
+              timestamp: new Date().toISOString(),
+      
+              });
 
             setCoinPageIndex(0)
             SheetManager.show('CoinPage_Sheet',  {

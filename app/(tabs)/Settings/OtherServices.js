@@ -51,6 +51,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { HomeContext } from '../../Context/HomeContext';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { usePostHog } from 'posthog-react-native';
 
 import { TextInput } from 'react-native-gesture-handler';
 
@@ -83,7 +84,9 @@ const documentId = 'b7e0f8af-9e06-4751-b502-a7ac44655e86';  // Example document 
 
 export default function OtherServices() {
 
-  
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
   const { t } = useTranslation();
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -137,6 +140,19 @@ export default function OtherServices() {
   
    
   
+  
+
+
+
+
+
+   useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'OtherServices_Sheet',
+      $screen_name: 'OtherServices_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
   
 
       
@@ -365,6 +381,15 @@ export default function OtherServices() {
 
 <TouchableOpacity onPress={() => {
 
+
+posthog.capture('open_settings_legal_documents_bottomsheet', {
+  screen: 'OtherServices_Sheet',
+  $screen_name: 'OtherServices_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
+
 SheetManager.show("LegalDocuments_Sheet")
 }} style={{
   flexDirection: 'row',
@@ -419,6 +444,16 @@ style={{
 
 <TouchableOpacity onPress={() => {
 
+
+
+posthog.capture('open_settings_close_depot_bottomsheet', {
+  screen: 'OtherServices_Sheet',
+  $screen_name: 'OtherServices_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
+
 SheetManager.show("CloseDepot_Sheet")
 }} style={{
   flexDirection: 'row',
@@ -466,10 +501,20 @@ style={{
 <View style={{
   width: "100%",
   position: 'absolute',
-    bottom: height(2),
+    bottom: height(8),
      flexDirection: 'row',
 }}>
           <TouchableOpacity onPress={() => {
+
+
+          posthog.capture('close_settings_other_services_bottomsheet', {
+            screen: 'OtherServices_Sheet',
+            $screen_name: 'OtherServices_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
+
              Keyboard.dismiss(); // Dismiss the keyboard first
              setTimeout(() => {
                SheetManager.hide("OtherServices_Sheet"); // Now hide the sheet after a delay

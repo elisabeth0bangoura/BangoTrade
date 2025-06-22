@@ -60,11 +60,14 @@ import { FadeIn, FadeOut } from 'react-native-reanimated';
 import SearchFilter_All_Page from './SearchFilter/SearchFilter_All_Page';
 import FilterCoinsSearchTabs from './SearchFilter/FilterCoinsSearchTabs';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
 
 const SearchFilterPage =  React.memo(() => {
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
@@ -103,7 +106,17 @@ const SearchFilterPage =  React.memo(() => {
 
 
     
+       
+
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'SearchFilterPage_Sheet',
+        $screen_name: 'SearchFilterPage_Sheet',
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
     
+
 
   
   useEffect(() => {

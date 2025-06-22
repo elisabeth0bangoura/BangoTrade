@@ -37,6 +37,7 @@ import { ViewModeContext } from '@/app/Context/ViewModeContext';
 import { IndiceListContext } from '@/app/Context/IndiceListContext';
 import { Search2Context } from '@/app/Context/SearchIndexStateContext';
 import throttle from 'lodash/throttle';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -88,6 +89,8 @@ const Tab = createMaterialTopTabNavigator();
 
 
 export  function ExcahngeFilterSheet() {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -318,6 +321,8 @@ onClose={() => {
 
 
 export  function CurrenciesFilterSheet() {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -585,6 +590,8 @@ onClose={() => {
 
 
 export  function localesFilterSheet() {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -643,6 +650,17 @@ const renderItem = useCallback(({ item }) => {
   return (
     <TouchableOpacity
     onPress={() => {
+
+
+
+      posthog.capture('click_search_locales_filter_etf_button', {
+        screen: 'SearchFilterPage_Sheet',
+        $screen_name: 'SearchFilterPage_Sheet '+" / "+item.name,
+        timestamp: new Date().toISOString(),
+    
+        });
+
+
       setChoosedLocale(prev => {
         const cleaned = item.toLowerCase().trim();
         return prev.includes(cleaned)
@@ -840,6 +858,10 @@ onClose={() => {
 
 export  function MarketFilterSheet() {
 
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
   const { SearchIndex2, setSearchIndex2, SearchIndex3, setSearchIndex3 } = useContext(Search2Context);
@@ -897,6 +919,16 @@ const renderItem = useCallback(({ item }) => {
   return (
     <TouchableOpacity
     onPress={() => {
+
+
+      posthog.capture('click_search_filter_market_etf_button', {
+        screen: 'SearchFilterPage_Sheet',
+        $screen_name: 'SearchFilterPage_Sheet '+" / "+item.name,
+        timestamp: new Date().toISOString(),
+    
+        });
+
+
       setChoosedMarket(prev => {
         const cleaned = item.toLowerCase().trim();
         return prev.includes(cleaned)
@@ -1076,6 +1108,10 @@ onClose={() => {
 
 
 export default function SearchFilterETFs() {
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { SearchIndex2, setSearchIndex2, SearchIndex3, setSearchIndex3 } = useContext(Search2Context);
 
@@ -1561,6 +1597,13 @@ const renderItem = useCallback(({ item }) => {
 
   return (
     <TouchableOpacity onPress={() => {
+
+      posthog.capture('open_stock_bottomsheet', {
+        screen: 'SearchFilterPage_Sheet',
+        $screen_name: 'SearchFilterPage_Sheet '+" / "+item.name,
+        timestamp: new Date().toISOString(),
+    
+        });
       setCoinPageIndex(0)
       SheetManager.show('StockPage_Sheet',  {
         payload: { value: item.symbol, category: "ETF", }, // Passing dynamic data (payload)
@@ -1661,6 +1704,13 @@ const renderItem = useCallback(({ item }) => {
 
 
  <TouchableOpacity onPress={() => {
+
+posthog.capture('click_search_filter_exchange_filter_etf_button', {
+  screen: 'SearchFilterPage_Sheet',
+  $screen_name: 'SearchFilterPage_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
     SheetManager.show("ExcahngeFilter_Sheet")
   }}
 
@@ -1699,6 +1749,13 @@ const renderItem = useCallback(({ item }) => {
 
 
         <TouchableOpacity onPress={() => {
+
+        posthog.capture('click_search_filter_currencies_filter_etf_button', {
+          screen: 'SearchFilterPage_Sheet',
+          $screen_name: 'SearchFilterPage_Sheet',
+          timestamp: new Date().toISOString(),
+
+          });
           
          SheetManager.show("CurrenciesFilter_Sheet")
         }}
@@ -1737,6 +1794,14 @@ const renderItem = useCallback(({ item }) => {
 
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture('click_search_filter_locales_filter_etf_button', {
+            screen: 'SearchFilterPage_Sheet',
+            $screen_name: 'SearchFilterPage_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
           SheetManager.show("localesFilter_Sheet")
         }}
         style={{
@@ -1774,6 +1839,14 @@ const renderItem = useCallback(({ item }) => {
 
 
         <TouchableOpacity onPress={() => {
+
+          posthog.capture('click_search_filter_market_filter_etf_button', {
+            screen: 'SearchFilterPage_Sheet',
+            $screen_name: 'SearchFilterPage_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
+
           SheetManager.show("MarketFilter_Sheet")
         }}
         style={{

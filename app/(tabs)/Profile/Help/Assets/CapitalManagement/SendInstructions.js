@@ -30,6 +30,7 @@ import ActionSheet, {useSheetRef, SheetManager} from 'react-native-actions-sheet
 import { HomeChartContext } from '../../../../../Context/HomeChartContext';
 import { useRouter } from 'expo-router';
 
+import { usePostHog } from 'posthog-react-native';
 
 import RNPickerSelect from "react-native-picker-select";
 
@@ -58,7 +59,8 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 
 export default function SendInstructionsSheet () {
-  
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
 
 	const router = useRouter();
@@ -79,7 +81,7 @@ export default function SendInstructionsSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const SendInstructions_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -132,6 +134,14 @@ export default function SendInstructionsSheet () {
 
 
 
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'SendInstructions_Sheet',
+      $screen_name: 'SendInstructions_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 
@@ -499,7 +509,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={SendInstructions_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -607,7 +617,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
  <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
@@ -618,9 +628,15 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
 
 
 <TouchableOpacity onPress={() => {
+              posthog.capture(`close_send_instructions_bottomsheet`, {
+                screen: 'SendInstructionsSheet',
+                $screen_name: 'SendInstructionsSheet',
+                timestamp: new Date().toISOString(),
+    
+                });
           
       
-      SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
+      SheetManager.hide("SendInstructions_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

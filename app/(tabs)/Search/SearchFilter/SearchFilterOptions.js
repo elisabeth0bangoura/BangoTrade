@@ -38,6 +38,7 @@ import { IndiceListContext } from '@/app/Context/IndiceListContext';
 import { Search2Context } from '@/app/Context/SearchIndexStateContext';
 import throttle from 'lodash/throttle';
 import { OptionsListContext } from '@/app/Context/OptionsListContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -59,6 +60,8 @@ const Tab = createMaterialTopTabNavigator();
 
 
 export  function IPOFilterSheet() {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -124,6 +127,15 @@ const renderItem = useCallback(({ item }) => {
 
     <TouchableOpacity
     onPress={() => {
+
+
+      posthog.capture('click_search_filter_filterlist_options_button', {
+        screen: 'SearchFilterPage_Sheet',
+        $screen_name: 'SearchFilterPage_Sheet '+" / "+item.name,
+        timestamp: new Date().toISOString(),
+    
+        });
+      
       setChoosedFilter(prev => {
         const cleaned = item.id.toLowerCase().trim(); // ✅ safely extract the id  
         return prev.includes(cleaned)
@@ -313,6 +325,10 @@ onClose={() => {
 
 
 export default function SearchFilterOptions() {
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { SearchIndex2, setSearchIndex2, SearchIndex3, setSearchIndex3 } = useContext(Search2Context);
 
@@ -572,7 +588,12 @@ const renderItem = useCallback(({ item }) => {
          setCurrentCoinSelected(item)
         */
   
-
+         posthog.capture('open_stock_page_bottomsheet', {
+          screen: 'SearchFilterPage_Sheet',
+          $screen_name: 'SearchFilterPage_Sheet '+" / "+item.name,
+          timestamp: new Date().toISOString(),
+      
+          });
 
 
           setCoinPageIndex(0)
@@ -752,6 +773,16 @@ const renderItem = useCallback(({ item }) => {
 
 
  <TouchableOpacity onPress={() => {
+
+
+posthog.capture('click_search_filter_filterlist_options_button', {
+  screen: 'SearchFilterPage_Sheet',
+  $screen_name: 'SearchFilterPage_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
+
     SheetManager.show("Ipo_Sheet")
   }}
 

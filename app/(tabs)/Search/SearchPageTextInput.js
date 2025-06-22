@@ -59,11 +59,31 @@ import { Search2Context } from '@/app/Context/SearchIndexStateContext';
 import { FadeIn, FadeOut } from 'react-native-reanimated';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
 import SearchAssetsSlideViewData from './Search_Area/SearchAssetsSlideViewData';
+import { usePostHog } from 'posthog-react-native';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 const SearchPageTextInput =  React.memo(() => {
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
 
@@ -101,6 +121,14 @@ const SearchPageTextInput =  React.memo(() => {
 
     
 
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'Search_Input_Page',
+        $screen_name: 'Search_Input_Page',
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+    
 
     
     
@@ -137,9 +165,9 @@ const SearchPageTextInput =  React.memo(() => {
 
   
 
-
   const handleSearchChange = (text) => {
-    setSearchQuery(text); // ✅ Instant UI update
+    setSearchQuery(text); // ✅ Update the UI instantly
+
   };
   
   
@@ -285,7 +313,18 @@ ref={SearchPageTextInput_Sheet}
 
             ?
 
-          <TouchableOpacity style={{
+          <TouchableOpacity onPress={() => {
+            posthog.capture('open_search_filter_page_Sheet', {
+              screen: 'SearchPageTextInput_Sheet',
+              $screen_name: 'SearchPageTextInput_Sheet',
+              timestamp: new Date().toISOString(),
+            
+              });
+
+
+              SheetManager.show("SearchFilterPage_Sheet")
+          }}
+          style={{
               height: size(60),
               borderRadius: 15,
               width: size(60),
@@ -325,6 +364,14 @@ ref={SearchPageTextInput_Sheet}
     
 
            <TouchableOpacity onPress={() => {
+
+              posthog.capture('calcel_search_input_text_bottomsheet', {
+                screen: 'SearchPageTextInput_Sheet',
+                $screen_name: 'SearchPageTextInput_Sheet',
+                timestamp: new Date().toISOString(),
+              
+                });
+
             setSearchQuery("")
            }}
            style={{

@@ -39,6 +39,7 @@ import firestore from '@react-native-firebase/firestore';
 import {ToastMessageContext} from "../../Context/ToastMessageContext"
 
 import { BuyConfirmationSheetContext } from '../../Context/BuyConfirmationSheetContext';
+import { usePostHog } from 'posthog-react-native';
 
 import ActionSheet, {useSheetRef, FlatList, ScrollView, SheetManager} from 'react-native-actions-sheet';
 import { opacity } from 'react-native-redash';
@@ -73,6 +74,7 @@ const HEADER_HEIGHT = 300; // The height of the header
 
 const TransactionRecepieWidthraw =  React.memo((props) => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
 
@@ -159,6 +161,14 @@ console.log("Statement ID: ", statementId);
 
 
 
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'TransactionRecepieWidthraw_Sheet',
+      $screen_name: 'TransactionRecepieWidthraw_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
 
 
 
@@ -686,6 +696,14 @@ useEffect(() => {
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_transaction_confirmation_bottomsheet', {
+  screen: 'TransactionRecepieWidthraw_Sheet',
+  $screen_name: 'TransactionRecepieWidthraw_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
   SheetManager.show("TransactionConfirmation_Sheet")
 }}
 style={{

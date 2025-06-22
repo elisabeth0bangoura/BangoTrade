@@ -50,6 +50,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { HomeContext } from '../../Context/HomeContext';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { usePostHog } from 'posthog-react-native';
 
 import { TextInput } from 'react-native-gesture-handler';
 
@@ -83,6 +84,8 @@ const documentId = 'b7e0f8af-9e06-4751-b502-a7ac44655e86';  // Example document 
 export default function SettingsNotification() {
 
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
   const { t } = useTranslation();
 
@@ -136,6 +139,19 @@ export default function SettingsNotification() {
   
   
    
+  
+
+
+
+
+
+   useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'SettingsNotification_Sheet',
+      $screen_name: 'SettingsNotification_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
   
   
 
@@ -222,6 +238,14 @@ export default function SettingsNotification() {
   
   
     const toggleSwitchEmail = (newValue) => {
+
+      posthog.capture('clicked_settings_switch_email_bottomsheet', {
+        screen: 'SettingsNotification_Sheet',
+        $screen_name: 'SettingsNotification_Sheet',
+        timestamp: new Date().toISOString(),
+
+        });
+
         setisEnabledEmail((prev) => {
             console.log("Email Ads: ", !prev); // Logs the new value correctly
 
@@ -252,6 +276,14 @@ export default function SettingsNotification() {
 
 
     const toggleSwitchPushNotifications = (newValue) => {
+
+      posthog.capture('clicked_settings_switch_push_notification_bottomsheet', {
+        screen: 'SettingsNotification_Sheet',
+        $screen_name: 'SettingsNotification_Sheet',
+        timestamp: new Date().toISOString(),
+
+        });
+
         setisEnabledPushNotifications((prev) => {
             console.log("Push Notification: ", !prev); // Logs the new value correctly
 

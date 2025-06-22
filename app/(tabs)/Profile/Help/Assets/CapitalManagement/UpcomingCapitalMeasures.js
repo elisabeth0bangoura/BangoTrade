@@ -44,6 +44,7 @@ import firestore from '@react-native-firebase/firestore';
 import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot } from "@react-native-firebase/firestore";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 import { ReanimatedScrollView } from 'react-native-reanimated'; // If you want scroll-based animations
 import Animated, { Easing, FadeIn, FadeOut, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
@@ -59,6 +60,7 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 export default function UpcomingCapitalMeasuresSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -79,7 +81,7 @@ export default function UpcomingCapitalMeasuresSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const UpcomingCapitalMeasures_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -132,6 +134,13 @@ export default function UpcomingCapitalMeasuresSheet () {
 
 
 
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'UpcomingCapitalMeasures_Sheet',
+      $screen_name: 'UpcomingCapitalMeasures_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 
@@ -674,7 +683,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={UpcomingCapitalMeasures_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -830,15 +839,21 @@ Temporary changes in value may occur in the following cases:
   <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
 
 <TouchableOpacity onPress={() => {
           
+          posthog.capture(`close_send_instructions_bottomsheet`, {
+            screen: 'UpcomingCapitalMeasures_Sheet',
+            $screen_name: 'UpcomingCapitalMeasures_Sheet',
+            timestamp: new Date().toISOString(),
+
+            });
       
-      SheetManager.hide("PortfolioGrowthPerformance_Sheet"); // Now hide the sheet after a delay
+      SheetManager.hide("UpcomingCapitalMeasures_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

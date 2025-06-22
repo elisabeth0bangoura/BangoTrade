@@ -30,6 +30,7 @@ import ActionSheet, {useSheetRef, SheetManager} from 'react-native-actions-sheet
 import { HomeChartContext } from '../../../../../Context/HomeChartContext';
 import { useRouter } from 'expo-router';
 
+import { usePostHog } from 'posthog-react-native';
 
 import RNPickerSelect from "react-native-picker-select";
 
@@ -60,6 +61,8 @@ import SkeletonLoading from 'expo-skeleton-loading'
 export default function PortfolioAccountSheet () {
   
 
+  
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 	const router = useRouter();
 	const auth = getAuth();
@@ -79,7 +82,7 @@ export default function PortfolioAccountSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const PortfolioAccount_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -129,6 +132,28 @@ export default function PortfolioAccountSheet () {
   
 
   
+
+
+
+
+
+
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'PortfolioAccount_Sheet',
+      $screen_name: 'PortfolioAccount_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+
+
+
+
+
+
 
 
 
@@ -499,7 +524,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={PortfolioAccount_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -718,7 +743,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
  <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
@@ -728,10 +753,18 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
 
 
 
-<TouchableOpacity onPress={() => {
-          
+
+    <TouchableOpacity onPress={() => {
+
+    posthog.capture(`close_portfolio_account_bottomsheet`, {
+      screen: 'PortfolioAccount_Sheet',
+      $screen_name: 'PortfolioAccount_Sheet',
+      timestamp: new Date().toISOString(),
+
+      });
+              
       
-      SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
+      SheetManager.hide("PortfolioAccount_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

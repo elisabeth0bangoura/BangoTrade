@@ -32,6 +32,7 @@ import { useRouter } from 'expo-router';
 
 
 import RNPickerSelect from "react-native-picker-select";
+import { usePostHog } from 'posthog-react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { HomeContext } from '../../../../../Context/HomeContext';
@@ -59,6 +60,8 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 export default function LegalDocumentsSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
 
 	const router = useRouter();
@@ -79,7 +82,7 @@ export default function LegalDocumentsSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const LegalDocuments_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -130,6 +133,14 @@ export default function LegalDocumentsSheet () {
 
   
 
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'LegalDocuments_Sheet',
+      $screen_name: 'LegalDocuments_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 
@@ -499,7 +510,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={LegalDocuments_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -710,7 +721,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
  <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
@@ -722,7 +733,16 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
 
 <TouchableOpacity onPress={() => {
         
-      SheetManager.hide("Asset_Sheet"); // Now hide the sheet after a delay
+
+        posthog.capture(`close_legal_documents_bottomsheet`, {
+          screen: 'LegalDocuments_Sheet',
+          $screen_name: 'LegalDocuments_Sheet',
+          timestamp: new Date().toISOString(),
+
+          });
+
+
+      SheetManager.hide("LegalDocuments_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{

@@ -51,6 +51,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { HomeContext } from '../../Context/HomeContext';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { usePostHog } from 'posthog-react-native';
 
 import { TextInput } from 'react-native-gesture-handler';
 
@@ -85,7 +86,9 @@ const documentId = 'b7e0f8af-9e06-4751-b502-a7ac44655e86';  // Example document 
 
 export default function GeneralDocuments() {
 
-  
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
   const { t } = useTranslation();
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -141,6 +144,17 @@ export default function GeneralDocuments() {
   
   
 
+
+
+
+   useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'GeneralDocuments_Sheet',
+      $screen_name: 'GeneralDocuments_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
       
    
   
@@ -515,6 +529,17 @@ export default function GeneralDocuments() {
 
 
 <TouchableOpacity onPress={() => {
+
+
+
+posthog.capture('open_settings_AlpacaAccountApplicationandCustomerAgreement_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
+
 _AlpacaAccountApplicationandCustomerAgreement()
 }} style={{
   flexDirection: 'row',
@@ -567,6 +592,16 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+
+
+posthog.capture('open_settings_AlpacaTermsConditions_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
 _AlpacaTermsConditions()
 }} style={{
   flexDirection: 'row',
@@ -609,6 +644,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_settings_AlpacaSecuritiesPrivacyNotice_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
 _AlpacaSecuritiesPrivacyNotice()
 }} style={{
   flexDirection: 'row',
@@ -659,6 +702,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_settings_SIPCandExcessSIPCProtection_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
 _SIPCandExcessSIPCProtection()
 }} style={{
   flexDirection: 'row',
@@ -702,6 +753,13 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_settings_FINRACustomerIdentificationProgramNotice_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
 _FINRACustomerIdentificationProgramNotice()
 }} style={{
   flexDirection: 'row',
@@ -747,6 +805,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_settings_AlpacaSecuritiesBrokerageFeeSchedule_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
 _AlpacaSecuritiesBrokerageFeeSchedule()
 }} style={{
   flexDirection: 'row',
@@ -800,6 +866,15 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+
+posthog.capture('open_settings_AlpacaUseandRiskDisclosures_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
 _AlpacaUseandRiskDisclosures()
 }} style={{
   flexDirection: 'row',
@@ -852,6 +927,13 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_settings_AAlpacaPFOFDisclosure_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
 _AAlpacaPFOFDisclosure()
 }} style={{
   flexDirection: 'row',
@@ -907,6 +989,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_settings_ResponsibilitiesofIntroducingBrokerandClearingBroker_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
 _ResponsibilitiesofIntroducingBrokerandClearingBroker()
 }} style={{
   flexDirection: 'row',
@@ -952,6 +1042,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+
+posthog.capture('open_settings_AlpacaCryptoPrivacyNotice_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
 _AlpacaCryptoPrivacyNotice()
 }} style={{
   flexDirection: 'row',
@@ -1013,6 +1111,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_settings_AlpacaCryptoRiskDisclosure_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
 _AlpacaCryptoRiskDisclosure()
 }} style={{
   flexDirection: 'row',
@@ -1071,6 +1177,16 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+
+
+posthog.capture('open_settings_AlpacaCryptoCustodialAccountDisclosureStatement_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
 _AlpacaCryptoCustodialAccountDisclosureStatement()
 }} style={{
   flexDirection: 'row',
@@ -1128,6 +1244,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+
+posthog.capture('open_settings_AlpacaCryptoLLCFeeDisclosure_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
 _AlpacaCryptoLLCFeeDisclosure()
 }} style={{
   flexDirection: 'row',
@@ -1184,6 +1308,13 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_settings_FINRADayTradingRiskDisclosure_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
 _FINRADayTradingRiskDisclosure()
 }} style={{
   flexDirection: 'row',
@@ -1229,6 +1360,14 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+posthog.capture('open_settings_FINRAExtendedHoursTradingRiskDisclosure_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
 _FINRAExtendedHoursTradingRiskDisclosure()
 }} style={{
   flexDirection: 'row',
@@ -1273,6 +1412,15 @@ style={{
 
 
 <TouchableOpacity onPress={() => {
+
+
+posthog.capture('open_settings_FINRAETFRiskDisclosure_bottomsheet', {
+  screen: 'GeneralDocuments_Sheet',
+  $screen_name: 'GeneralDocuments_Sheet',
+  timestamp: new Date().toISOString(),
+
+  });
+
 _FINRAETFRiskDisclosure()
 }} style={{
   flexDirection: 'row',
@@ -1394,6 +1542,10 @@ style={{
   export  function Inprint() {
 
 
+
+    const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
     const { t } = useTranslation();
 
   
@@ -1451,7 +1603,14 @@ style={{
     
     
   
-        
+     useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'Inprint_Sheet',
+        $screen_name: 'Inprint_Sheet',
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
+    
      
     
      

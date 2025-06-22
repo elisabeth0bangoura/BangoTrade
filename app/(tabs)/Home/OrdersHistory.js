@@ -46,6 +46,7 @@ import { getFirestore, addDoc,getDoc, collection, doc, onSnapshot } from "@react
 import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -73,6 +74,7 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 export default OrdersHistory = () => {
   
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const router = useRouter();
   const auth = getAuth();
@@ -114,7 +116,14 @@ export default OrdersHistory = () => {
 
 
 
-
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'OrdersHistory',
+      $screen_name: 'OrdersHistory',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
 
 
 

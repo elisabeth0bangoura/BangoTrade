@@ -51,6 +51,7 @@ import { SearchContext } from "../../Context/MainSearchIndexStateContext"
 import { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated'; // Using Reanimated for smoother animations
 import { IFollowingsCoinsContext } from '../../Context/OpenIFollowingsCoinsSheetContext';
 import { TextInput } from 'react-native-gesture-handler';
+import { useFocusEffect } from 'expo-router';
 
 import { CoinPageContext } from '../../Context/OpenCoinPageContext';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
@@ -59,12 +60,17 @@ import ETFSSheetData from './Search_Area/ETFSSheetData';
 import DerivatesData from './Search_Area/DerivatesData';
 import BondsData from './Search_Area/BondsData';
 import { HomeChartContext } from '@/app/Context/HomeChartContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
 
 
 const SearchPage =  React.memo(() => {
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
 
 
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
@@ -132,6 +138,18 @@ const SearchPage =  React.memo(() => {
       fetchTickerData(); // Fetch ticker data when the component mounts
     }, []);
   */
+
+
+
+
+
+    useEffect(() => {
+      posthog.capture('screen_viewed', {
+        screen: 'Search_Page',
+        $screen_name: 'Search_Page',
+        timestamp: new Date().toISOString(),
+      });
+    }, []);
     
 
   
@@ -541,6 +559,14 @@ const SearchPage =  React.memo(() => {
 
 
   <TouchableOpacity onPress={() => {
+
+posthog.capture('open_search_input_bottomsheet', {
+  screen: 'Search_Input_Page',
+  $screen_name: 'Search_Input_Page',
+  timestamp: new Date().toISOString(),
+
+  });
+  
     SheetManager.show("SearchPageTextInput_Sheet")
   }}
   style={{
@@ -575,6 +601,14 @@ const SearchPage =  React.memo(() => {
 
 
   <TouchableOpacity onPress={() => {
+
+posthog.capture('open_search_filter_bottomsheet', {
+  screen: 'Search_Filter_Page',
+  $screen_name: 'Search_Filter_Page',
+  timestamp: new Date().toISOString(),
+
+  });
+
     SheetManager.show("SearchFilterPage_Sheet")
   }}
   style={{
@@ -657,6 +691,17 @@ null
 
 
   <TouchableOpacity onPress={() => {
+
+
+
+posthog.capture('open_search_input_bottomsheet', {
+  screen: 'Search_Input_Page',
+  $screen_name: 'Search_Input_Page',
+  timestamp: new Date().toISOString(),
+
+  });
+
+
     SheetManager.show("SearchPageTextInput_Sheet")
   }}
   style={{
@@ -691,6 +736,14 @@ null
 
 
   <TouchableOpacity onPress={() => {
+
+posthog.capture('open_search_filter_bottomsheet', {
+  screen: 'Search_Filter_Page',
+  $screen_name: 'Search_Filter_Page',
+  timestamp: new Date().toISOString(),
+
+  });
+  
     SheetManager.show("SearchFilterPage_Sheet")
   }}
   style={{

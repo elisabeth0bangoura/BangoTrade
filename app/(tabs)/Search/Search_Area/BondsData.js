@@ -34,6 +34,7 @@ import { CurrentCoinSelectedContext } from '@/app/Context/CurrentCoinSelectedCon
 import { SheetManager } from 'react-native-actions-sheet';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
 import SvgFromUri from './SvgFromUri';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -93,6 +94,7 @@ const SkeletonPlaceholder = () => {
 
 export default function BondsData({ SearchIndex }) {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -322,6 +324,15 @@ useEffect(() => {
 
   return (
    <TouchableOpacity onPress={() => {
+
+
+    posthog.capture('open_stock_bottomsheet', {
+      screen: 'Stock_Page',
+      $screen_name: 'Stock_Page '+" / "+item.name,
+      timestamp: new Date().toISOString(),
+  
+      });
+
 
     const handleItemClick = async (item) => {
       try {

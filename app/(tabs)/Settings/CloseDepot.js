@@ -53,6 +53,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
 import { TextInput } from 'react-native-gesture-handler';
+import { usePostHog } from 'posthog-react-native';
 
 import {
 	Onfido,
@@ -83,7 +84,9 @@ const documentId = 'b7e0f8af-9e06-4751-b502-a7ac44655e86';  // Example document 
 
 export default function CloseDepot() {
 
-  
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
   const { t } = useTranslation();
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -137,6 +140,21 @@ export default function CloseDepot() {
    
   
   
+
+
+
+
+
+    
+   useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'CloseDepot_Sheet',
+      $screen_name: 'CloseDepot_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
+   
 
       
    
@@ -413,7 +431,7 @@ export default function CloseDepot() {
           }}>
      
           <Entypo name='news' style={{
-            color:  CurrentViewMode.Main_IconButtonBg_WIdthrawTransactionReceipe,
+            color:  CurrentViewMode.Mode_fontColor,
             fontSize: size(22)
           }} />
                  
@@ -489,7 +507,7 @@ export default function CloseDepot() {
           }}>
      
           <MaterialCommunityIcons name='bank-transfer' style={{
-            color:  CurrentViewMode.Main_IconButtonBg_WIdthrawTransactionReceipe,
+            color:  CurrentViewMode.Mode_fontColor,
             fontSize: size(30)
           }} />
                  
@@ -562,7 +580,7 @@ export default function CloseDepot() {
           }}>
      
           <Ionicons name='checkmark-done-sharp' style={{
-            color:  CurrentViewMode.Main_IconButtonBg_WIdthrawTransactionReceipe,
+            color:  CurrentViewMode.Mode_fontColor,
             fontSize: size(25)
           }} />
                  
@@ -611,10 +629,18 @@ export default function CloseDepot() {
 <View style={{
   width: "100%",
   position: 'absolute',
-    bottom: height(2),
+    bottom: height(8),
      flexDirection: 'row',
 }}>
           <TouchableOpacity onPress={() => {
+
+            posthog.capture('close_settings_close_depot_bottomsheet', {
+              screen: 'CloseDepot_Sheet',
+              $screen_name: 'CloseDepot_Sheet',
+              timestamp: new Date().toISOString(),
+
+              });
+
              Keyboard.dismiss(); // Dismiss the keyboard first
              setTimeout(() => {
                SheetManager.hide("CloseDepot_Sheet"); // Now hide the sheet after a delay
@@ -642,6 +668,15 @@ export default function CloseDepot() {
 
 
           <TouchableOpacity onPress={async () => {
+
+
+
+            posthog.capture('open_settings_close_depot_part2_bottomsheet', {
+              screen: 'CloseDepot_Sheet',
+              $screen_name: 'CloseDepot_Sheet',
+              timestamp: new Date().toISOString(),
+
+              });
 
         //    console.log({FirstName: NewFirstName, LastName: NewLastName})
             //  contact: {email_address: 'dssd', phone_number: 'sdsd'},

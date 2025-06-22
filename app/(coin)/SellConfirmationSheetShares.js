@@ -53,6 +53,7 @@ import { useRouter } from "expo-router";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
 import { CashContext } from '../Context/CashContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -75,6 +76,7 @@ export const SellOrderTypeSharesSheetPage = () => {
 
   const { t } = useTranslation();
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
 
@@ -98,6 +100,22 @@ export const SellOrderTypeSharesSheetPage = () => {
       setOrderTypeIndex,
       SharesSellAmount, 
       setSharesSellAmount, } = useContext(SellAmountContext);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -378,6 +396,7 @@ export const SellOrderTypeSharesSheetPage = () => {
 
 const SellConfirmationSheetShares =  React.memo(() => {
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
   const { t } = useTranslation();
 
@@ -526,7 +545,42 @@ const SellConfirmationSheetShares =  React.memo(() => {
 
  
 
+
+
+
+
+
+
+
+
+  
+ useEffect(() => {
+  posthog.capture('screen_viewed', {
+    screen: 'SellConfirmationShares_Sheet',
+    $screen_name: 'SellConfirmationShares_Sheet '+" / "+coinData.name,
+    timestamp: new Date().toISOString(),
+  });
+}, []);
+
+
+
+
+
+
+
+
+
+
  const CloseAddMoneyToAccountSheet = () => {
+
+
+  posthog.capture('canceled_checkout_selling_asset', {
+    screen: 'SellConfirmationShares_Sheet',
+    $screen_name: 'SellConfirmationShares_Sheet '+" / "+coinData.name,
+    timestamp: new Date().toISOString(),
+    });
+
+    
   SheetManager.hide("SellConfirmationShares_Sheet");
 
   setBuyConfirmationSheetIndex(-1)
@@ -921,7 +975,7 @@ return(
 
 
 
- <ActionSheet  id="SellConfirmationShares_Sheet"
+ <ActionSheet id="SellConfirmationShares_Sheet"
   ref={SellConfirmationShares_Sheet}
 
   isModal={false} 
@@ -929,6 +983,13 @@ return(
   backgroundInteractionEnabled={false}
   gestureEnabled={true}
   onClose={() => {
+
+    posthog.capture('closed_sheet', {
+      screen: 'SellConfirmationShares_Sheet',
+      $screen_name: 'SellConfirmationShares_Sheet '+" / "+coinData.name,
+      timestamp: new Date().toISOString(),
+      });
+
     toastTriggered.current = false;
     setShowToastSell(false); // ✅ hide toast
 
@@ -1343,6 +1404,15 @@ const SellCrypto = async () => {
          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
         // ✅ Step 2: wait for toast to show (you can adjust 600ms to match your animation)
+
+
+        posthog.capture('successfully_finish_checkout_selling_asset', {
+          screen: 'SellConfirmationShares_Sheet',
+          $screen_name: 'SellConfirmationShares_Sheet '+" / "+coinData.name,
+          timestamp: new Date().toISOString(),
+          });
+
+
         setTimeout(() => {
           Promise.all([
             SheetManager.hide("SellConfirmationShares_Sheet"),

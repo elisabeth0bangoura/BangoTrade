@@ -13,6 +13,7 @@ import { width, height, size } from "react-native-responsive-sizes";
 import axios from 'axios';
 
 
+import { usePostHog } from 'posthog-react-native';
 
 
 import * as Haptics from 'expo-haptics';
@@ -65,6 +66,7 @@ import CrispChat, {
 
 export default function HelpSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -130,6 +132,28 @@ export default function HelpSheet () {
         "Basic Q0taUVBHVkg4RllQWDZZNVBXWEU6SDJUVTZJamk5Z2tRVXJuMjRrOUR0WFJoUmFzN2VZSjFzclhCZXZLOA==",
     },
   };
+
+
+
+
+
+
+
+
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'Help_Sheet',
+      $screen_name: 'Help_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+  
+
+
+
   
 
   
@@ -246,6 +270,14 @@ fetchUserData();
     const [crispKey, setCrispKey] = useState(0);
     
     const toggleChat = () => {
+
+      posthog.capture('open_help_chat_bottomsheet', {
+        screen: 'Help_Sheet',
+        $screen_name: 'Help_Sheet',
+        timestamp: new Date().toISOString(),
+
+        });
+
       setChatVisible(false); // force unmount first
       setTimeout(() => {
         setCrispKey(prev => prev + 1); // force fresh mount
@@ -356,6 +388,15 @@ fetchUserData();
 
 
           <TouchableOpacity onPress={() => {
+
+
+              posthog.capture('open_help_asset_bottomsheet', {
+                screen: 'Help_Sheet',
+                $screen_name: 'Help_Sheet',
+                timestamp: new Date().toISOString(),
+
+                });
+
             SheetManager.show("Asset_Sheet")
           }}
           style={{
@@ -410,6 +451,15 @@ fetchUserData();
 
 
      <TouchableOpacity onPress={() => {
+
+
+
+        posthog.capture('open_help_profile_bottomsheet', {
+          screen: 'Help_Sheet',
+          $screen_name: 'Help_Sheet',
+          timestamp: new Date().toISOString(),
+
+          });
         SheetManager.show("ProfileHelp_Sheet")
      }}
      style={{

@@ -64,7 +64,8 @@
     } from '@onfido/react-native-sdk'; 
   import { ToastMessageContext } from '@/app/Context/ToastMessageContext';
   import { ViewModeContext } from '@/app/Context/ViewModeContext';
-  
+  import { usePostHog } from 'posthog-react-native';
+
   // Replace with your Onfido API Token and Document ID
   const apiToken = 'eyJhbGciOiJFUzUxMiJ9.eyJleHAiOjE3MzcyODU2MzUsInBheWxvYWQiOnsiYXBwIjoiMDBkNjI4ZGMtNmI5Zi00ZWVhLThkNDMtOTZhYzllOTM2YzRlIiwiY2xpZW50X3V1aWQiOiJkOGU2NjI0NC00ODgwLTQyMzktODE1OS03NWIyOTZiYTgwMDgiLCJpc19zYW5kYm94Ijp0cnVlLCJpc19zZWxmX3NlcnZpY2VfdHJpYWwiOmZhbHNlLCJpc190cmlhbCI6ZmFsc2UsInJlZiI6IioiLCJzYXJkaW5lX3Nlc3Npb24iOiI0ZTAwZGZlMy1mNDllLTRjMTgtYWMyMi1kZjY0MDcwOTZiMzIifSwidXVpZCI6InBsYXRmb3JtX3N0YXRpY19hcGlfdG9rZW5fdXVpZCIsInVybHMiOnsiZGV0ZWN0X2RvY3VtZW50X3VybCI6Imh0dHBzOi8vc2RrLnVzLm9uZmlkby5jb20iLCJzeW5jX3VybCI6Imh0dHBzOi8vc3luYy5vbmZpZG8uY29tIiwiaG9zdGVkX3Nka191cmwiOiJodHRwczovL2lkLm9uZmlkby5jb20iLCJhdXRoX3VybCI6Imh0dHBzOi8vYXBpLnVzLm9uZmlkby5jb20iLCJvbmZpZG9fYXBpX3VybCI6Imh0dHBzOi8vYXBpLnVzLm9uZmlkby5jb20iLCJ0ZWxlcGhvbnlfdXJsIjoiaHR0cHM6Ly9hcGkudXMub25maWRvLmNvbSJ9fQ.MIGGAkF0rw7l5fuzZZZvfNFiI1BXeS-gVF0JMCzorclBZ_jTz8lY6ZF05I4fTARsq3BpNw8c6yNMiBmQ_LouZAwsPNuO9wJBMAr-yoT3znJetCdJPGhoV3gAd0cz-KAylkAX-HBSyxoafwrwloIqzaA5UzpzlR7KWd3NC4F3TeTDVb2ZU-9qRdo';  // Replace with your Onfido API token
   const documentId = 'b7e0f8af-9e06-4751-b502-a7ac44655e86';  // Example document ID
@@ -85,6 +86,10 @@
   
   export default function LegalDocumentsHelpSheet () {
   
+
+    const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
     const { t } = useTranslation();
   
     const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -97,7 +102,7 @@
   
       
       const windowHeight = Dimensions.get('window').height;
-      const LegalDocuments_Sheet = useRef(null);
+      const LegalDocumentsHelp_Sheet = useRef(null);
       const calculatedHeight = windowHeight * 0.88;
     
       const firstNameInputRef = useRef(null); // Ref for First Name Input
@@ -138,6 +143,14 @@
     
      
     
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'LegalDocumentsHelp_Sheet',
+      $screen_name: 'LegalDocumentsHelp_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+
     
   
         
@@ -300,7 +313,7 @@
     
     
       <ActionSheet  gestureEnabled
-      ref={LegalDocuments_Sheet}
+      ref={LegalDocumentsHelp_Sheet}
       backgroundInteractionEnabled={false}
       isModal={false}
       onOpen={handleOpen}

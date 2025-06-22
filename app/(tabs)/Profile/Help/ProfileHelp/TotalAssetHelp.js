@@ -48,6 +48,7 @@ import firestore from '@react-native-firebase/firestore';
 import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot } from "@react-native-firebase/firestore";
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "@react-native-firebase/auth";
 import { getDatabase, ref, get } from "@react-native-firebase/database";
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -60,6 +61,7 @@ import { getDatabase, ref, get } from "@react-native-firebase/database";
 
 export default function TotalAssetHelpSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 	const router = useRouter();
 	const auth = getAuth();
@@ -107,6 +109,14 @@ const formatPrice = (price) => {
 
 
 
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'TotalAsset_Sheet',
+      $screen_name: 'TotalAsset_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
 
 
 

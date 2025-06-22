@@ -44,6 +44,7 @@ import { HomeContext } from '../../../Context/HomeContext';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { ViewModeContext } from '../../../Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -55,6 +56,11 @@ import { ViewModeContext } from '../../../Context/ViewModeContext';
 
 export default function PortfolioStatementsSheet () {
   
+
+
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
+
   const { t } = useTranslation();
 
     const { CurrentViewMode, setCurrentViewMode, themes } = useContext(ViewModeContext);
@@ -78,6 +84,19 @@ export default function PortfolioStatementsSheet () {
   
   const calculatedHeight = windowHeight * 0.92;
   
+
+
+
+
+  useEffect(() => {
+    posthog.capture('screen_viewed', {
+      screen: 'PortfolioStatements_Sheet',
+      $screen_name: 'PortfolioStatements_Sheet',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+
+
   
   
   
@@ -153,6 +172,14 @@ export default function PortfolioStatementsSheet () {
         
   
       <TouchableOpacity onPress={() => {
+
+        posthog.capture('open_statements_date_type_portfolio_bottomsheet', {
+          screen: 'StatementsDateTypePortfolio_Sheet',
+          $screen_name: 'StatementsDateTypePortfolio_Sheet',
+          timestamp: new Date().toISOString(),
+          });
+
+          
         SheetManager.show("StatementsDateTypePortfolio_Sheet")
       }}
       style={{
@@ -205,6 +232,14 @@ export default function PortfolioStatementsSheet () {
          
   
           <TouchableOpacity onPress={() => {
+
+        posthog.capture('open_statements_date_type_crypto_bottomsheet', {
+          screen: 'StatementsDateTypeCrypto_Sheet',
+          $screen_name: 'StatementsDateTypeCrypto_Sheet',
+          timestamp: new Date().toISOString(),
+          });
+
+
             SheetManager.show("StatementsDateTypeCrypto_Sheet")
           }}
           style={{

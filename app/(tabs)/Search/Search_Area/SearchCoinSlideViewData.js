@@ -40,6 +40,7 @@ import { CoinPageContext } from '@/app/Context/OpenCoinPageContext';
 import ActionSheet, {useSheetRef, SheetManager} from 'react-native-actions-sheet';
 import { FadeIn, FadeOut } from 'react-native-reanimated';
 import { ViewModeContext } from '@/app/Context/ViewModeContext';
+import { usePostHog } from 'posthog-react-native';
 
 
 
@@ -97,6 +98,8 @@ const SkeletonPlaceholder = () => {
 export default function SearchCoinSlideViewData ({SearchIndex2, searchQuery})  {
 
 
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
+
   const { t, i18n } = useTranslation(); // Destructure i18n for language changes
 
   
@@ -116,6 +119,13 @@ export default function SearchCoinSlideViewData ({SearchIndex2, searchQuery})  {
 
   
 
+
+
+
+
+
+
+  
 
 
   // 🔹 Define API Headers
@@ -420,6 +430,13 @@ export default function SearchCoinSlideViewData ({SearchIndex2, searchQuery})  {
 
 
     <TouchableOpacity onPress={() => {
+
+      posthog.capture('open_coin_bottomsheet', {
+        screen: 'Coin_Page',
+        $screen_name: 'Coin_Page '+" / "+item.name,
+        timestamp: new Date().toISOString(),
+
+        });
         // Handle item press if needed
         setCoinPageIndex(0);
         SheetManager.show('CoinPage_Sheet');

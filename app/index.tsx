@@ -10,11 +10,26 @@ import { FirebaseAuthTypes } from "@react-native-firebase/auth"; // ✅ Import F
 import axios from "axios";
 import i18n from "@/Languages_Translation_Screens/i18n";
 import { getDatabase, ref, get } from 'firebase/database';
+import { Platform } from "react-native"; // ✅ make sure this is imported
+import { getAnalytics, setUserId, setUserProperties } from '@react-native-firebase/analytics';
+import analytics from "@react-native-firebase/analytics"; // ✅ Correct import for RN Firebase
+import posthog from 'posthog-react-native';
+import { usePostHog } from 'posthog-react-native';
+
+
+
+
+
+
+
 
 
 const MAX_FAILED_ATTEMPTS = 3;
 
 const SplashScreenComponent: React.FC = () => {
+
+  const posthog = usePostHog();
+
   const router = useRouter();
   const auth = getAuth();
   const db = getFirestore();
@@ -24,16 +39,7 @@ const SplashScreenComponent: React.FC = () => {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
   const [loadingText, setLoadingText] = useState("Lade...");
-  const [hasPromptedFaceId, setHasPromptedFaceId] = useState(false); // ✅ Prevent loop
-
-
-
-
-
-
-
-
-  
+  const [hasPromptedFaceId, setHasPromptedFaceId] = useState(false);
 
   useEffect(() => {
     const loadInitial = async () => {
@@ -83,7 +89,6 @@ const SplashScreenComponent: React.FC = () => {
   };
 
   const checkFaceIdAuthentication = async (uid: string) => {
-    setShowSplash(true);
     setLoadingText("Face ID überprüfen...");
 
     const result = await LocalAuthentication.authenticateAsync({
@@ -102,8 +107,7 @@ const SplashScreenComponent: React.FC = () => {
         await handleSignOut();
       } else {
         Alert.alert("Fehlgeschlagen", `Versuch ${newAttempts}/${MAX_FAILED_ATTEMPTS}`);
-        setShowSplash(false);
-        setHasPromptedFaceId(false); // ✅ Allow retry
+        setHasPromptedFaceId(false); // Allow retry
       }
     } else {
       console.log("✅ Face ID erfolgreich");
@@ -112,6 +116,8 @@ const SplashScreenComponent: React.FC = () => {
     }
   };
 
+
+  
   const fetchUserData = async (uid: string) => {
     try {
       setLoadingText("Anmeldung läuft...");
@@ -129,6 +135,8 @@ const SplashScreenComponent: React.FC = () => {
       const email = userData?.Email;
       const password = userData?.Password;
 
+
+
       if (!email || !password) {
         console.log("❌ E-Mail oder Passwort fehlen");
         await handleSignOut();
@@ -136,12 +144,14 @@ const SplashScreenComponent: React.FC = () => {
       }
 
       await signInWithEmailAndPassword(auth, email, password);
+ 
       console.log("✅ Anmeldung erfolgreich");
 
       await AsyncStorage.setItem("lastAuthTime", Date.now().toString());
       await AsyncStorage.setItem("userUID", JSON.stringify(uid));
 
       setShowSplash(false);
+      await SplashScreen.hideAsync(); // optional: hides native splash
       router.replace("/(tabs)/Home/home");
     } catch (error) {
       console.error("❌ Fehler bei Anmeldung:", error);
@@ -160,16 +170,17 @@ const SplashScreenComponent: React.FC = () => {
     }
 
     setShowSplash(false);
+    await SplashScreen.hideAsync();
     router.replace("/(auth)/signUp");
   };
 
   return (
     <>
-      {showSplash && (
-        <View style={styles.splashContainer}>
-          <Image source={require("../assets/images/icon.png")} style={styles.logo} />
-        </View>
-      )}
+       {Platform.OS === "android" && showSplash && appState !== "active" ? (
+      <View style={styles.splashContainer}>
+        <Image source={require("../assets/images/icon.png")} style={styles.logo} />
+      </View>
+    ) : null}
     </>
   );
 };

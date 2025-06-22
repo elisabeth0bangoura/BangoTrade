@@ -13,6 +13,7 @@ import { width, height, size } from "react-native-responsive-sizes";
 import axios from 'axios';
 
 
+import { usePostHog } from 'posthog-react-native';
 
 
 import * as Haptics from 'expo-haptics';
@@ -58,6 +59,7 @@ import SkeletonLoading from 'expo-skeleton-loading'
 
 export default function PositionIsDisplayedIncorrectlyOrNotAtAllSheet () {
   
+  const posthog = usePostHog(); // ✅ this gives you access to the actual instance
 
 
 	const router = useRouter();
@@ -78,7 +80,7 @@ export default function PositionIsDisplayedIncorrectlyOrNotAtAllSheet () {
     const {MetricsState, setMetricsState} = useContext(HomeChartContext)
     const {setCurrentChoosedItem} = useContext(HomeContext)
     const windowHeight = Dimensions.get('window').height;
-    const Activity_Sheet = useRef(null);
+    const PositionIsDisplayedIncorrectlyOrNotAtAll_Sheet = useRef(null);
     const calculatedHeight = windowHeight * 0.92;
   
     const [AlpacaUserId, setAlpacaUserId] = useState();
@@ -673,7 +675,7 @@ const formatMoneyMyInvestmnt = useCallback((price) => {
   
   
         <ActionSheet 
-        ref={Activity_Sheet}
+        ref={PositionIsDisplayedIncorrectlyOrNotAtAll_Sheet}
         gestureEnabled={true}
         isModal={true}
         backgroundInteractionEnabled={false}  // ✅ Prevents closing on background tap
@@ -845,15 +847,22 @@ please contact us by selecting the relevant order or buy event in your transacti
   <View style={{
     width: "100%",
     position: 'absolute',
-    bottom: height(5),
+    bottom: height(8),
     flexDirection: 'row',
 }}>
 
 
 <TouchableOpacity onPress={() => {
           
+          
+          posthog.capture('close_positionIs_displayed_incorrectly_or_not_at_all_Sheet', {
+            screen: 'PositionIsDisplayedIncorrectlyOrNotAtAll_Sheet',
+            $screen_name: 'PositionIsDisplayedIncorrectlyOrNotAtAll_Sheet',
+            timestamp: new Date().toISOString(),
+            });
+  
       
-      SheetManager.hide("PortfolioGrowthPerformance_Sheet"); // Now hide the sheet after a delay
+      SheetManager.hide("PositionIsDisplayedIncorrectlyOrNotAtAll_Sheet"); // Now hide the sheet after a delay
               
       }}
         style={{
